@@ -199,6 +199,22 @@ async def test_ignite_is_lighting_and_active(hass: HomeAssistant, clock) -> None
     assert hass.states.get(ACTIVE).state == STATE_ON
 
 
+async def test_cool_down_is_active(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 65)  # between the cool_down and burn_1 thresholds
+    assert hass.states.get(STATE).state == "cool_down"
+    assert hass.states.get(GENERAL).state == "cooldown"
+    assert hass.states.get(ACTIVE).state == STATE_ON
+
+
+async def test_extinguish_is_active(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 10)  # between the extinguish and post_ignite thresholds
+    assert hass.states.get(STATE).state == "extinguish"
+    assert hass.states.get(GENERAL).state == "cooldown"
+    assert hass.states.get(ACTIVE).state == STATE_ON
+
+
 async def test_fault_is_not_active(hass: HomeAssistant, clock) -> None:
     await _setup(hass, _entry())
     await _settle(hass, clock, 0.5)

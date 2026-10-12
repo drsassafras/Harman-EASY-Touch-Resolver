@@ -132,7 +132,9 @@ def test_every_general_state_has_a_translation_and_an_icon():
         found = {k[len(prefix):] for k in keys if k.startswith(prefix)}
         assert found == set(GENERAL_STATE_OPTIONS), path.stem
     icons = json.loads((COMPONENT / "icons.json").read_text())
-    assert set(icons["entity"]["sensor"]["general_state"]["state"]) == set(GENERAL_STATE_OPTIONS)
+    # "unknown" has its own icon too; every real value needs one.
+    icon_keys = set(icons["entity"]["sensor"]["general_state"]["state"]) - {"unknown"}
+    assert icon_keys == set(GENERAL_STATE_OPTIONS)
 
 
 def test_every_profile_error_has_a_translated_message():
@@ -175,3 +177,46 @@ def test_translation_keys_are_valid():
     from custom_components.harman_easytouch_resolver.const import IMPORT_NEW
 
     assert key_pattern.match(IMPORT_NEW)
+
+
+def test_icons_switch_with_the_state_and_never_default_to_a_lit_fireplace():
+    from custom_components.harman_easytouch_resolver.const import (
+        ACTIVE_GENERAL_STATES,
+        GENERAL_STATE_MAP,
+        ORDER,
+    )
+
+    icons = json.loads((COMPONENT / "icons.json").read_text())["entity"]
+    state = icons["sensor"]["state"]
+    general = icons["sensor"]["general_state"]
+    active = icons["binary_sensor"]["active"]
+
+    # Anything that is not matched (unavailable, an unexpected value) must not look lit.
+    for entry in (state, general, active):
+        assert entry["default"] == "mdi:fireplace-off"
+        assert entry["state"]["unknown"] == "mdi:help-circle-outline"
+
+    for raw, value in GENERAL_STATE_MAP.items():
+        assert raw in state["state"], raw
+        assert value in general["state"], value
+    assert set(state["state"]) - {"unknown"} == set(ORDER)
+
+    # Idle is never shown with a fire, in either sensor or the binary sensor.
+    assert state["state"]["idle"] == general["state"]["idle"] == "mdi:fireplace-off"
+    assert active["state"]["on"] == "mdi:fireplace"
+    # Cooling down is still active, so it uses the same lit fireplace as the binary sensor.
+    assert state["state"]["cool_down"] == state["state"]["extinguish"] == "mdi:fireplace"
+    assert general["state"]["cooldown"] == "mdi:fireplace"
+    assert {"lighting", "burning", "cooldown"} == ACTIVE_GENERAL_STATES
+
+    # The general state always uses the same family of icon as the raw states it covers.
+    families = {
+        "faulted": {"mdi:alert-circle", "mdi:alert"},
+        "lighting": {"mdi:fire-circle"},
+        "burning": {"mdi:fire"},
+        "cooldown": {"mdi:fireplace"},
+        "idle": {"mdi:fireplace-off"},
+    }
+    for raw, value in GENERAL_STATE_MAP.items():
+        assert state["state"][raw] in families[value], raw
+        assert general["state"][value] in families[value], value

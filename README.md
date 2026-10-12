@@ -25,13 +25,13 @@ Each stove you add creates one device with:
 |---|---|
 | **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. Has `raw_state` and `moving_average` attributes. |
 | **General state** (sensor) | A simplified view: `faulted`, `lighting`, `burning`, `cooldown`, `idle`. Shown translated in your language. |
-| **Active** (binary sensor) | On while the general state is `lighting` or `burning`. |
+| **Active** (binary sensor) | On while the general state is `lighting`, `burning` or `cooldown`, so it stays on until the stove has finished cooling down. |
 
 ## Upgrading to 0.3.0 (breaking change)
 
 The **General state** sensor's values changed from `Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle` to the lowercase `faulted`, `lighting`, `burning`, `cooldown`, `idle`, so Home Assistant can translate them. Update anything that compares against the old values: automations, templates, scripts, dashboards and conditional cards. Look for the old capitalised words.
 
-History from before the upgrade keeps the old values, so a history graph shows both. The **State** sensor and the **Active** binary sensor are unchanged.
+History from before the upgrade keeps the old values, so a history graph shows both. The **State** sensor is unchanged. The **Active** binary sensor now also stays on during `cooldown` (the `extinguish` and `cool_down` states), where it used to turn off as soon as the stove stopped burning.
 
 ## Use cases
 

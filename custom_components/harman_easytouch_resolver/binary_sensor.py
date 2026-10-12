@@ -24,7 +24,7 @@ async def async_setup_entry(
 
 
 class StoveActiveBinarySensor(StoveEntity, BinarySensorEntity):
-    """On while the general state is lighting or burning."""
+    """On while the stove is lighting, burning or cooling down."""
 
     _attr_translation_key = "active"
     _attr_device_class = BinarySensorDeviceClass.RUNNING

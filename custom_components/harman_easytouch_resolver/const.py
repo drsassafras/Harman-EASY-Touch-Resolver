@@ -76,8 +76,9 @@ GENERAL_STATE_MAP = {
 }
 GENERAL_STATE_OPTIONS = ["faulted", "lighting", "burning", "cooldown", "idle"]
 
-# The binary sensor is on when the general state is one of these.
-ACTIVE_GENERAL_STATES = {"lighting", "burning"}
+# The binary sensor is on when the general state is one of these. The stove is still
+# running (fan on, pellets burning off) during cooldown, so it counts as active.
+ACTIVE_GENERAL_STATES = {"lighting", "burning", "cooldown"}
 
 # Dropdown value that means "let me import / design a new profile".
 IMPORT_NEW = "import_new"
