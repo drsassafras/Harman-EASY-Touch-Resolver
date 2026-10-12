@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.const import CONF_NAME
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
@@ -23,6 +23,7 @@ from homeassistant.helpers.selector import (
 from homeassistant.util import slugify
 
 from .const import (
+    CONF_EDIT_PROFILE,
     CONF_PROFILE,
     CONF_PROFILE_JSON,
     CONF_SOURCE,
@@ -69,6 +70,17 @@ def _check_profile_text(text: str) -> tuple[Profile | None, str | None]:
     return profile, None
 
 
+def _source_in_use(
+    hass: HomeAssistant, source: str, exclude_entry_id: str | None = None
+) -> bool:
+    """True if another stove already watches this power sensor."""
+    return any(
+        entry.options.get(CONF_SOURCE) == source
+        for entry in hass.config_entries.async_entries(DOMAIN)
+        if entry.entry_id != exclude_entry_id
+    )
+
+
 class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
     """Add one stove."""
 
@@ -81,15 +93,19 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
         store = await async_get_profile_store(self.hass)
         if user_input is not None:
             self._name = user_input[CONF_NAME].strip()
             self._source = user_input[CONF_SOURCE]
             await self.async_set_unique_id(slugify(self._name))
             self._abort_if_unique_id_configured()
-            if user_input[CONF_PROFILE] == IMPORT_NEW:
+            if _source_in_use(self.hass, self._source):
+                errors["base"] = "source_in_use"
+            elif user_input[CONF_PROFILE] == IMPORT_NEW:
                 return await self.async_step_import_profile()
-            return self._create(user_input[CONF_PROFILE])
+            else:
+                return self._create(user_input[CONF_PROFILE])
 
         schema = vol.Schema(
             {
@@ -100,7 +116,11 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
                 ),
             }
         )
-        return self.async_show_form(step_id="user", data_schema=schema)
+        return self.async_show_form(
+            step_id="user",
+            data_schema=self.add_suggested_values_to_schema(schema, user_input),
+            errors=errors,
+        )
 
     async def async_step_import_profile(
         self, user_input: dict[str, Any] | None = None
@@ -144,31 +164,53 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class HarmanEasyTouchOptionsFlow(OptionsFlow):
-    """Change source/profile, or import / design a profile."""
+    """Change source/profile, and optionally edit the profile JSON."""
+
+    def __init__(self) -> None:
+        self._source: str | None = None
+        self._profile: str | None = None
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        return self.async_show_menu(
-            step_id="init", menu_options=["settings", "import_profile"]
-        )
-
-    async def async_step_settings(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
         store = await async_get_profile_store(self.hass)
         options = self.config_entry.options
+
         if user_input is not None:
-            return self.async_create_entry(data={**options, **user_input})
+            if _source_in_use(
+                self.hass, user_input[CONF_SOURCE], self.config_entry.entry_id
+            ):
+                errors["base"] = "source_in_use"
+            else:
+                self._source = user_input[CONF_SOURCE]
+                self._profile = user_input[CONF_PROFILE]
+                if user_input.get(CONF_EDIT_PROFILE):
+                    return await self.async_step_import_profile()
+                return self.async_create_entry(
+                    data={
+                        **options,
+                        CONF_SOURCE: self._source,
+                        CONF_PROFILE: self._profile,
+                    }
+                )
+
         schema = vol.Schema(
             {
-                vol.Required(CONF_SOURCE, default=options.get(CONF_SOURCE)): _SOURCE_SELECTOR,
-                vol.Required(
-                    CONF_PROFILE, default=options.get(CONF_PROFILE, DEFAULT_PROFILE)
-                ): _profile_selector(store.names),
+                vol.Required(CONF_SOURCE): _SOURCE_SELECTOR,
+                vol.Required(CONF_PROFILE): _profile_selector(store.names),
+                vol.Optional(CONF_EDIT_PROFILE, default=False): bool,
             }
         )
-        return self.async_show_form(step_id="settings", data_schema=schema)
+        suggested = user_input or {
+            CONF_SOURCE: options.get(CONF_SOURCE),
+            CONF_PROFILE: options.get(CONF_PROFILE, DEFAULT_PROFILE),
+        }
+        return self.async_show_form(
+            step_id="init",
+            data_schema=self.add_suggested_values_to_schema(schema, suggested),
+            errors=errors,
+        )
 
     async def async_step_import_profile(
         self, user_input: dict[str, Any] | None = None
@@ -188,9 +230,11 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
                 return await self._save_and_apply(profile)
             suggested = user_input
         else:
-            # Start from the current profile so it can be edited and saved under a new name.
+            # Start from the selected profile so it can be edited and saved under a new name.
             store = await async_get_profile_store(self.hass)
-            name = self.config_entry.options.get(CONF_PROFILE, DEFAULT_PROFILE)
+            name = self._profile or self.config_entry.options.get(
+                CONF_PROFILE, DEFAULT_PROFILE
+            )
             suggested = {CONF_PROFILE_JSON: template_json(store.get(name) or ALLURE_50)}
 
         return self.async_show_form(
@@ -204,7 +248,11 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
         await async_save_profile(
             self.hass, profile, skip_entry_id=self.config_entry.entry_id
         )
-        options = {**self.config_entry.options, CONF_PROFILE: profile.name}
+        options = {
+            **self.config_entry.options,
+            CONF_SOURCE: self._source or self.config_entry.options.get(CONF_SOURCE),
+            CONF_PROFILE: profile.name,
+        }
         if options == self.config_entry.options:
             # Same name re-imported: options don't change, so reload explicitly.
             self.hass.config_entries.async_schedule_reload(self.config_entry.entry_id)

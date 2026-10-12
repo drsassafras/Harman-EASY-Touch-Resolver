@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ychwanegu stôf Harman EasyTouch",
+        "description": "Dewiswch y synhwyrydd pŵer (watiau) ar gyfer y stôf hon. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad. Dewiswch broffil sy'n bodoli eisoes, neu dewiswch \"Import / design a new profile\" i fynd ymlaen i'r golygydd proffiliau.",
+        "data": {
+          "name": "Enw'r stôf",
+          "source_entity": "Monitro pŵer ar gyfer y stôf belenni (watiau)",
+          "profile": "Proffil y stôf"
+        },
+        "data_description": {
+          "name": "Enw ar gyfer y stôf hon, er enghraifft \"Stôf yr ystafell fyw\".",
+          "source_entity": "Synhwyrydd sy'n adrodd faint o bŵer trydanol y mae'r stôf yn ei dynnu mewn watiau, er enghraifft o blwg clyfar neu fonitor ynni. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad.",
+          "profile": "Y trothwyon a'r amseriadau a ddefnyddir i weithio allan cyflwr y stôf. Dewiswch broffil, neu dewiswch \"Import / design a new profile…\" i agor y golygydd JSON."
+        }
+      },
+      "import_profile": {
+        "title": "Mewnforio / dylunio proffil",
+        "description": "Gludwch JSON proffil, neu golygwch yr enghraifft isod. Caiff y proffil ei gadw o dan ei \"name\" a'i ddefnyddio ar gyfer y stôf hon. Ni ellir trosysgrifo enwau proffiliau adeiledig.\n\nMae trothwyon ac amseriadau ill dau yn cyfeirio at briodoledd `moving_average`, ac mae'r pum allwedd amseru i gyd yn ddewisol.\n\n**Trothwyon**\n\nMae pob gwerth yn derfyn isaf cyflwr, mewn watiau. Mae cyflwr yn berthnasol pan fo `moving_average` y synhwyrydd uwchlaw trothwy'r cyflwr hwnnw ac nid uwchlaw trothwy'r cyflwr nesaf i fyny. Rhaid i'r gwerthoedd ostwng yn llym o `ignite` i lawr i `idle`. Ar werth `idle` neu islaw, y cyflwr yw `sensor_fault`.\n\n**Amseriadau**\n\nDim ond ar ôl i'r cyflwr newydd bara am nifer penodol o eiliadau y daw newid cyflwr yn derfynol. Mae amseriadau pob cyflwr yn berthnasol wrth symud i mewn i'r cyflwr hwnnw. Mae gan y cyflyrau drefn sefydlog: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` i `burn_6`, `ignite`. Mae pob allwedd yn ddewisol.\n\n| Allwedd | Eiliadau i aros pan fyddwch yn... | Os yw ar goll |\n|---|---|---|\n| `sequp` | symud un cam i fyny i mewn i'r cyflwr hwn | 0 |\n| `seqdown` | symud un cam i lawr i mewn i'r cyflwr hwn | 0 |\n| `nonseq` | neidio mwy nag un cam (er enghraifft `burn_1` i `burn_3`) | 0 |\n| `cascadeup` | symud un cam i fyny ar ôl newid anorffenedig | defnyddio `sequp` |\n| `cascadedown` | symud un cam i lawr ar ôl newid anorffenedig | defnyddio `seqdown` |\n\nMae newid yn \"anorffenedig\" pan fo'r cyflwr yn newid eto cyn i'r newid blaenorol ddod yn derfynol. Enghraifft: mae'r stôf ar `burn_1` ac yn symud i `burn_2`, ond cyn i'r arhosiad ddod i ben mae'n symud i `burn_3`. Yna mae'r arhosiad ar gyfer `burn_3` yn defnyddio `cascadeup` yn lle `sequp`. Mae newid newydd bob amser yn canslo'r un sy'n dal i aros.",
+        "data": {
+          "profile_json": "Profile JSON"
+        },
+        "data_description": {
+          "profile_json": "Y proffil ar ffurf JSON. Gweler y disgrifiad uchod am y fformat."
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Nid yw'r proffil yn ddilys: {error}",
+      "reserved_name": "Mae'r enw hwnnw'n perthyn i broffil adeiledig. Defnyddiwch \"name\" gwahanol.",
+      "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw."
+    },
+    "abort": {
+      "already_configured": "Mae stôf gyda'r enw hwn eisoes yn bodoli."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opsiynau Harman EasyTouch",
+        "description": "Newidiwch synhwyrydd pŵer neu broffil y stôf hon. I olygu JSON y proffil, ticiwch \"Golygu JSON y proffil\" a dewiswch Cyflwyno.",
+        "data": {
+          "source_entity": "Monitro pŵer ar gyfer y stôf belenni (watiau)",
+          "profile": "Proffil y stôf",
+          "edit_profile": "Golygu JSON y proffil"
+        },
+        "data_description": {
+          "source_entity": "Synhwyrydd sy'n adrodd faint o bŵer trydanol y mae'r stôf yn ei dynnu mewn watiau, er enghraifft o blwg clyfar neu fonitor ynni. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad.",
+          "profile": "Y trothwyon a'r amseriadau a ddefnyddir i weithio allan cyflwr y stôf.",
+          "edit_profile": "Ticiwch hwn a dewiswch Cyflwyno i agor y golygydd JSON ar gyfer y proffil a ddewiswyd. Caiff proffiliau adeiledig eu cadw fel copi o dan enw newydd."
+        }
+      },
+      "import_profile": {
+        "title": "Mewnforio / dylunio proffil",
+        "description": "Gludwch JSON proffil, neu golygwch y proffil cyfredol isod. Caiff ei gadw o dan ei \"name\" a'i gymhwyso i'r stôf hon, felly newidiwch y \"name\" i gadw'r gwreiddiol hefyd. Ni ellir trosysgrifo enwau proffiliau adeiledig.\n\nMae trothwyon ac amseriadau ill dau yn cyfeirio at briodoledd `moving_average`, ac mae'r pum allwedd amseru i gyd yn ddewisol.\n\n**Trothwyon**\n\nMae pob gwerth yn derfyn isaf cyflwr, mewn watiau. Mae cyflwr yn berthnasol pan fo `moving_average` y synhwyrydd uwchlaw trothwy'r cyflwr hwnnw ac nid uwchlaw trothwy'r cyflwr nesaf i fyny. Rhaid i'r gwerthoedd ostwng yn llym o `ignite` i lawr i `idle`. Ar werth `idle` neu islaw, y cyflwr yw `sensor_fault`.\n\n**Amseriadau**\n\nDim ond ar ôl i'r cyflwr newydd bara am nifer penodol o eiliadau y daw newid cyflwr yn derfynol. Mae amseriadau pob cyflwr yn berthnasol wrth symud i mewn i'r cyflwr hwnnw. Mae gan y cyflyrau drefn sefydlog: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` i `burn_6`, `ignite`. Mae pob allwedd yn ddewisol.\n\n| Allwedd | Eiliadau i aros pan fyddwch yn... | Os yw ar goll |\n|---|---|---|\n| `sequp` | symud un cam i fyny i mewn i'r cyflwr hwn | 0 |\n| `seqdown` | symud un cam i lawr i mewn i'r cyflwr hwn | 0 |\n| `nonseq` | neidio mwy nag un cam (er enghraifft `burn_1` i `burn_3`) | 0 |\n| `cascadeup` | symud un cam i fyny ar ôl newid anorffenedig | defnyddio `sequp` |\n| `cascadedown` | symud un cam i lawr ar ôl newid anorffenedig | defnyddio `seqdown` |\n\nMae newid yn \"anorffenedig\" pan fo'r cyflwr yn newid eto cyn i'r newid blaenorol ddod yn derfynol. Enghraifft: mae'r stôf ar `burn_1` ac yn symud i `burn_2`, ond cyn i'r arhosiad ddod i ben mae'n symud i `burn_3`. Yna mae'r arhosiad ar gyfer `burn_3` yn defnyddio `cascadeup` yn lle `sequp`. Mae newid newydd bob amser yn canslo'r un sy'n dal i aros.",
+        "data": {
+          "profile_json": "Profile JSON"
+        },
+        "data_description": {
+          "profile_json": "Y proffil ar ffurf JSON. Gweler y disgrifiad uchod am y fformat."
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Nid yw'r proffil yn ddilys: {error}",
+      "reserved_name": "Mae'r enw hwnnw'n perthyn i broffil adeiledig. Defnyddiwch \"name\" gwahanol.",
+      "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw."
+    }
+  }
+}

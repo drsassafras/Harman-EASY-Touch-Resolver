@@ -31,7 +31,9 @@ class ProfileStore:
 
     @property
     def names(self) -> list[str]:
-        return list(BUILTIN_PROFILES) + sorted(self._custom)
+        return list(BUILTIN_PROFILES) + sorted(
+            name for name in self._custom if name not in BUILTIN_PROFILES
+        )
 
     def get(self, name: str) -> Profile | None:
         return BUILTIN_PROFILES.get(name) or self._custom.get(name)

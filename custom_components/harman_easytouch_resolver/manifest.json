@@ -1,12 +1,12 @@
 {
   "domain": "harman_easytouch_resolver",
-  "name": "Harman EasyTouch Resolver",
+  "name": "Harman EASY Touch Resolver",
   "codeowners": [],
   "config_flow": true,
-  "documentation": "https://example.com/harman_easytouch_resolver",
+  "documentation": "https://github.com/drsassafras/Harman-EASY-Touch-Resolver",
   "integration_type": "device",
   "iot_class": "calculated",
-  "issue_tracker": "https://example.com/harman_easytouch_resolver/issues",
+  "issue_tracker": "https://github.com/drsassafras/Harman-EASY-Touch-Resolver/issues",
   "requirements": [],
-  "version": "0.1.3"
+  "version": "0.2.0"
 }

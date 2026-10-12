@@ -1,0 +1,2 @@
+# Pulls in a matching Home Assistant, pytest, pytest-asyncio and pytest-cov.
+pytest-homeassistant-custom-component

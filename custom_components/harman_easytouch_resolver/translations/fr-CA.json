@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ajouter un poêle Harman EasyTouch",
+        "description": "Choisissez le capteur de puissance (watts) de ce poêle. Il sert uniquement à calculer la moyenne mobile sur 20 secondes. Choisissez un profil existant, ou « Import / design a new profile » pour passer à l'éditeur de profil.",
+        "data": {
+          "name": "Nom du poêle",
+          "source_entity": "Surveillance de la puissance du poêle à granules (watts)",
+          "profile": "Profil du poêle"
+        },
+        "data_description": {
+          "name": "Un nom pour ce poêle, par exemple « Poêle du salon ».",
+          "source_entity": "Un capteur qui indique la puissance électrique consommée par le poêle en watts, par exemple une prise intelligente ou un moniteur d'énergie. Il sert uniquement à calculer la moyenne mobile sur 20 secondes.",
+          "profile": "Les seuils et les délais servant à déterminer l'état du poêle. Choisissez un profil, ou « Import / design a new profile… » pour ouvrir l'éditeur JSON."
+        }
+      },
+      "import_profile": {
+        "title": "Importer / concevoir un profil",
+        "description": "Collez le JSON du profil ou modifiez l'exemple ci-dessous. Le profil est enregistré sous son « name » et utilisé pour ce poêle. Les noms de profils intégrés ne peuvent pas être écrasés.\n\nLes seuils et les délais se rapportent tous deux à l'attribut `moving_average`, et les cinq clés de délai sont facultatives.\n\n**Seuils**\n\nChaque valeur est la limite inférieure d'un état, en watts. Un état s'applique lorsque la `moving_average` du capteur est supérieure au seuil de cet état et non supérieure au seuil de l'état suivant au-dessus. Les valeurs doivent décroître strictement de `ignite` jusqu'à `idle`. À la valeur de `idle` ou en dessous, l'état est `sensor_fault`.\n\n**Délais**\n\nUn changement d'état ne devient définitif qu'après que le nouvel état a été maintenu pendant un nombre de secondes donné. Les délais de chaque état s'appliquent lors du passage vers cet état. Les états suivent un ordre fixe : `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, de `burn_1` à `burn_6`, `ignite`. Toutes les clés sont facultatives.\n\n| Clé | Secondes d'attente lors... | Si absente |\n|---|---|---|\n| `sequp` | d'un passage d'un cran vers le haut vers cet état | 0 |\n| `seqdown` | d'un passage d'un cran vers le bas vers cet état | 0 |\n| `nonseq` | d'un saut de plus d'un cran (par exemple de `burn_1` à `burn_3`) | 0 |\n| `cascadeup` | d'un passage d'un cran vers le haut après un changement inachevé | utilise `sequp` |\n| `cascadedown` | d'un passage d'un cran vers le bas après un changement inachevé | utilise `seqdown` |\n\nUn changement est « inachevé » lorsque l'état change à nouveau avant que le changement précédent soit devenu définitif. Exemple : le poêle est à `burn_1` et passe à `burn_2`, mais avant la fin de l'attente il passe à `burn_3`. L'attente pour `burn_3` utilise alors `cascadeup` au lieu de `sequp`. Un nouveau changement annule toujours celui qui est encore en attente.",
+        "data": {
+          "profile_json": "Profile JSON"
+        },
+        "data_description": {
+          "profile_json": "Le profil au format JSON. Consultez la description ci-dessus pour le format."
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Le profil n'est pas valide : {error}",
+      "reserved_name": "Ce nom appartient à un profil intégré. Utilisez un « name » différent.",
+      "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle."
+    },
+    "abort": {
+      "already_configured": "Un poêle portant ce nom existe déjà."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options Harman EasyTouch",
+        "description": "Modifiez le capteur de puissance ou le profil de ce poêle. Pour modifier le JSON du profil, cochez « Modifier le JSON du profil » puis sélectionnez Soumettre.",
+        "data": {
+          "source_entity": "Surveillance de la puissance du poêle à granules (watts)",
+          "profile": "Profil du poêle",
+          "edit_profile": "Modifier le JSON du profil"
+        },
+        "data_description": {
+          "source_entity": "Un capteur qui indique la puissance électrique consommée par le poêle en watts, par exemple une prise intelligente ou un moniteur d'énergie. Il sert uniquement à calculer la moyenne mobile sur 20 secondes.",
+          "profile": "Les seuils et les délais servant à déterminer l'état du poêle.",
+          "edit_profile": "Cochez cette case puis sélectionnez Soumettre pour ouvrir l'éditeur JSON du profil sélectionné. Les profils intégrés sont enregistrés comme copie sous un nouveau nom."
+        }
+      },
+      "import_profile": {
+        "title": "Importer / concevoir un profil",
+        "description": "Collez le JSON du profil ou modifiez le profil actuel ci-dessous. Il est enregistré sous son « name » et appliqué à ce poêle; changez donc le « name » pour conserver aussi l'original. Les noms de profils intégrés ne peuvent pas être écrasés.\n\nLes seuils et les délais se rapportent tous deux à l'attribut `moving_average`, et les cinq clés de délai sont facultatives.\n\n**Seuils**\n\nChaque valeur est la limite inférieure d'un état, en watts. Un état s'applique lorsque la `moving_average` du capteur est supérieure au seuil de cet état et non supérieure au seuil de l'état suivant au-dessus. Les valeurs doivent décroître strictement de `ignite` jusqu'à `idle`. À la valeur de `idle` ou en dessous, l'état est `sensor_fault`.\n\n**Délais**\n\nUn changement d'état ne devient définitif qu'après que le nouvel état a été maintenu pendant un nombre de secondes donné. Les délais de chaque état s'appliquent lors du passage vers cet état. Les états suivent un ordre fixe : `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, de `burn_1` à `burn_6`, `ignite`. Toutes les clés sont facultatives.\n\n| Clé | Secondes d'attente lors... | Si absente |\n|---|---|---|\n| `sequp` | d'un passage d'un cran vers le haut vers cet état | 0 |\n| `seqdown` | d'un passage d'un cran vers le bas vers cet état | 0 |\n| `nonseq` | d'un saut de plus d'un cran (par exemple de `burn_1` à `burn_3`) | 0 |\n| `cascadeup` | d'un passage d'un cran vers le haut après un changement inachevé | utilise `sequp` |\n| `cascadedown` | d'un passage d'un cran vers le bas après un changement inachevé | utilise `seqdown` |\n\nUn changement est « inachevé » lorsque l'état change à nouveau avant que le changement précédent soit devenu définitif. Exemple : le poêle est à `burn_1` et passe à `burn_2`, mais avant la fin de l'attente il passe à `burn_3`. L'attente pour `burn_3` utilise alors `cascadeup` au lieu de `sequp`. Un nouveau changement annule toujours celui qui est encore en attente.",
+        "data": {
+          "profile_json": "Profile JSON"
+        },
+        "data_description": {
+          "profile_json": "Le profil au format JSON. Consultez la description ci-dessus pour le format."
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Le profil n'est pas valide : {error}",
+      "reserved_name": "Ce nom appartient à un profil intégré. Utilisez un « name » différent.",
+      "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle."
+    }
+  }
+}

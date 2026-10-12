@@ -23,7 +23,7 @@ class StoveEntity(RestoreEntity):
             identifiers={(DOMAIN, entry.entry_id)},
             name=entry.title,
             manufacturer="Harman",
-            model="EasyTouch",
+            model=runtime.profile.name,
         )
 
     @property

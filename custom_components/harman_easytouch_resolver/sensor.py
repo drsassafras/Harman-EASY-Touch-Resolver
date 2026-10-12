@@ -21,6 +21,17 @@ async def async_setup_entry(
     async_add_entities([StoveStateSensor(runtime), StoveGeneralStateSensor(runtime)])
 
 
+# State values here are capitalised, which icons.json state keys cannot be, so the
+# per-state icons are provided by the entity instead.
+GENERAL_STATE_ICONS = {
+    "Faulted": "mdi:alert-circle",
+    "Lighting": "mdi:fire-circle",
+    "Burning": "mdi:fire",
+    "Cooldown": "mdi:fire-off",
+    "Idle": "mdi:fireplace-off",
+}
+
+
 class StoveStateSensor(StoveEntity, SensorEntity):
     """The resolved state. Values match the old input_select options."""
 
@@ -56,6 +67,10 @@ class StoveGeneralStateSensor(StoveEntity, SensorEntity):
 
     def __init__(self, runtime: StoveRuntime) -> None:
         super().__init__(runtime, "general_state")
+
+    @property
+    def icon(self) -> str | None:
+        return GENERAL_STATE_ICONS.get(self.runtime.general_state or "")
 
     @property
     def native_value(self) -> str | None:

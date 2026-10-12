@@ -5,6 +5,7 @@ DOMAIN = "harman_easytouch_resolver"
 CONF_SOURCE = "source_entity"
 CONF_PROFILE = "profile"
 CONF_PROFILE_JSON = "profile_json"
+CONF_EDIT_PROFILE = "edit_profile"
 
 DEFAULT_PROFILE = "Allure 50"
 

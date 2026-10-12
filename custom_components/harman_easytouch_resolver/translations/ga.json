@@ -1,0 +1,71 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Cuir sparán Harman EasyTouch leis",
+        "description": "Roghnaigh braiteoir cumhachta (vata) don sparán seo. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin. Roghnaigh próifíl atá ann cheana, nó roghnaigh \"Import / design a new profile\" chun leanúint ar aghaidh chuig eagarthóir na próifíle.",
+        "data": {
+          "name": "Ainm an sparáin",
+          "source_entity": "Monatóireacht cumhachta don sparán peiléad (vata)",
+          "profile": "Próifíl an sparáin"
+        },
+        "data_description": {
+          "name": "Ainm don sparán seo, mar shampla \"Sparán an tseomra suí\".",
+          "source_entity": "Braiteoir a thuairiscíonn tarraingt cumhachta leictrí an sparáin i vataí, mar shampla ó phlocóid chliste nó ó mhonatóir fuinnimh. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin.",
+          "profile": "Na tairseacha agus na hamanna a úsáidtear chun staid an sparáin a oibriú amach. Roghnaigh próifíl, nó roghnaigh \"Import / design a new profile…\" chun eagarthóir JSON a oscailt."
+        }
+      },
+      "import_profile": {
+        "title": "Iompórtáil / dearadh próifíle",
+        "description": "Greamaigh JSON próifíle, nó cuir an sampla thíos in eagar. Sábháiltear an phróifíl faoina \"name\" agus úsáidtear í don sparán seo. Ní féidir ainmneacha próifílí ionsuite a fhorscríobh.\n\nTagraíonn tairseacha agus amanna araon don tréith `moving_average`, agus tá na cúig eochair ama roghnach.\n\n**Tairseacha**\n\nIs é gach luach teorainn íochtarach staide, i vataí. Baineann staid le cás nuair atá `moving_average` an bhraiteora os cionn tairseach na staide sin agus nach bhfuil os cionn thairseach na chéad staide eile suas. Ní mór do na luachanna laghdú go docht ó `ignite` anuas go `idle`. Ag luach `idle` nó faoina bhun, is é `sensor_fault` an staid.\n\n**Amanna**\n\nNí bhíonn athrú staide críochnaitheach go dtí go bhfuil an staid nua coinnithe ar feadh líon socraithe soicindí. Baineann amanna gach staide leis an gcás ina n-aistrítear isteach sa staid sin. Tá ord seasta ag na staideanna: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` go `burn_6`, `ignite`. Tá gach eochair roghnach.\n\n| Eochair | Soicindí le fanacht nuair a... | Mura bhfuil sí ann |\n|---|---|---|\n| `sequp` | bhogtar aon chéim suas isteach sa staid seo | 0 |\n| `seqdown` | bhogtar aon chéim síos isteach sa staid seo | 0 |\n| `nonseq` | léimtear níos mó ná aon chéim amháin (mar shampla `burn_1` go `burn_3`) | 0 |\n| `cascadeup` | bhogtar aon chéim suas tar éis athrú neamhchríochnaithe | úsáideann `sequp` |\n| `cascadedown` | bhogtar aon chéim síos tar éis athrú neamhchríochnaithe | úsáideann `seqdown` |\n\nTá athrú \"neamhchríochnaithe\" nuair a athraíonn an staid arís sular tháinig an t-athrú roimhe sin chun bheith críochnaitheach. Sampla: tá an sparán ag `burn_1` agus bogann sé go `burn_2`, ach sula gcríochnaíonn an fanacht bogann sé go `burn_3`. Úsáideann an fanacht do `burn_3` `cascadeup` in ionad `sequp` ansin. Cuireann athrú nua deireadh i gcónaí leis an athrú atá fós ag fanacht.",
+        "data": {
+          "profile_json": "Profile JSON"
+        },
+        "data_description": {
+          "profile_json": "An phróifíl i bhformáid JSON. Féach an cur síos thuas don fhormáid."
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Níl an phróifíl bailí: {error}",
+      "reserved_name": "Is le próifíl ionsuite an t-ainm sin. Úsáid \"name\" eile.",
+      "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana."
+    },
+    "abort": {
+      "already_configured": "Tá sparán leis an ainm seo ann cheana."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Roghanna Harman EasyTouch",
+        "description": "Athraigh braiteoir cumhachta nó próifíl an sparáin seo. Chun JSON na próifíle a chur in eagar, cuir tic le \"Cuir JSON na próifíle in eagar\" agus roghnaigh Seol.",
+        "data": {
+          "source_entity": "Monatóireacht cumhachta don sparán peiléad (vata)",
+          "profile": "Próifíl an sparáin",
+          "edit_profile": "Cuir JSON na próifíle in eagar"
+        },
+        "data_description": {
+          "source_entity": "Braiteoir a thuairiscíonn tarraingt cumhachta leictrí an sparáin i vataí, mar shampla ó phlocóid chliste nó ó mhonatóir fuinnimh. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin.",
+          "profile": "Na tairseacha agus na hamanna a úsáidtear chun staid an sparáin a oibriú amach.",
+          "edit_profile": "Cuir tic anseo agus roghnaigh Seol chun eagarthóir JSON na próifíle roghnaithe a oscailt. Sábháiltear próifílí ionsuite mar chóip faoi ainm nua."
+        }
+      },
+      "import_profile": {
+        "title": "Iompórtáil / dearadh próifíle",
+        "description": "Greamaigh JSON próifíle, nó cuir an phróifíl reatha thíos in eagar. Sábháiltear í faoina \"name\" agus cuirtear i bhfeidhm ar an sparán seo í, mar sin athraigh an \"name\" chun an bunleagan a choinneáil freisin. Ní féidir ainmneacha próifílí ionsuite a fhorscríobh.\n\nTagraíonn tairseacha agus amanna araon don tréith `moving_average`, agus tá na cúig eochair ama roghnach.\n\n**Tairseacha**\n\nIs é gach luach teorainn íochtarach staide, i vataí. Baineann staid le cás nuair atá `moving_average` an bhraiteora os cionn tairseach na staide sin agus nach bhfuil os cionn thairseach na chéad staide eile suas. Ní mór do na luachanna laghdú go docht ó `ignite` anuas go `idle`. Ag luach `idle` nó faoina bhun, is é `sensor_fault` an staid.\n\n**Amanna**\n\nNí bhíonn athrú staide críochnaitheach go dtí go bhfuil an staid nua coinnithe ar feadh líon socraithe soicindí. Baineann amanna gach staide leis an gcás ina n-aistrítear isteach sa staid sin. Tá ord seasta ag na staideanna: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` go `burn_6`, `ignite`. Tá gach eochair roghnach.\n\n| Eochair | Soicindí le fanacht nuair a... | Mura bhfuil sí ann |\n|---|---|---|\n| `sequp` | bhogtar aon chéim suas isteach sa staid seo | 0 |\n| `seqdown` | bhogtar aon chéim síos isteach sa staid seo | 0 |\n| `nonseq` | léimtear níos mó ná aon chéim amháin (mar shampla `burn_1` go `burn_3`) | 0 |\n| `cascadeup` | bhogtar aon chéim suas tar éis athrú neamhchríochnaithe | úsáideann `sequp` |\n| `cascadedown` | bhogtar aon chéim síos tar éis athrú neamhchríochnaithe | úsáideann `seqdown` |\n\nTá athrú \"neamhchríochnaithe\" nuair a athraíonn an staid arís sular tháinig an t-athrú roimhe sin chun bheith críochnaitheach. Sampla: tá an sparán ag `burn_1` agus bogann sé go `burn_2`, ach sula gcríochnaíonn an fanacht bogann sé go `burn_3`. Úsáideann an fanacht do `burn_3` `cascadeup` in ionad `sequp` ansin. Cuireann athrú nua deireadh i gcónaí leis an athrú atá fós ag fanacht.",
+        "data": {
+          "profile_json": "Profile JSON"
+        },
+        "data_description": {
+          "profile_json": "An phróifíl i bhformáid JSON. Féach an cur síos thuas don fhormáid."
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "Níl an phróifíl bailí: {error}",
+      "reserved_name": "Is le próifíl ionsuite an t-ainm sin. Úsáid \"name\" eile.",
+      "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana."
+    }
+  }
+}
