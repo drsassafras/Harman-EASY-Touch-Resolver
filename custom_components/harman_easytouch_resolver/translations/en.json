@@ -39,15 +39,17 @@
     "step": {
       "init": {
         "title": "Harman EasyTouch options",
-        "description": "Change the power sensor or profile for this stove. To edit the profile JSON, tick \"Edit profile JSON\" and select Submit.",
+        "description": "Change the power sensor or profile for this stove, and how long to keep the last state when the sensor drops out. To edit the profile JSON, tick \"Edit profile JSON\" and select Submit.",
         "data": {
           "source_entity": "Power monitoring for pellet stove (watts)",
           "profile": "Stove profile",
+          "unavailable_delay": "Keep last state when the sensor drops out (seconds)",
           "edit_profile": "Edit profile JSON"
         },
         "data_description": {
           "source_entity": "A sensor that reports the stove's electrical power draw in watts, for example from a smart plug or energy monitor. It is only used to build the 20 second moving average.",
           "profile": "The thresholds and timings used to work out the stove's state.",
+          "unavailable_delay": "How long to keep showing the last state after the power sensor becomes unavailable, including while it starts up after a Home Assistant restart. Set to 0 to show the stove as unavailable immediately.",
           "edit_profile": "Tick this and select Submit to open the JSON editor for the selected profile. Built-in profiles are saved as a copy under a new name."
         }
       },

@@ -39,15 +39,17 @@
     "step": {
       "init": {
         "title": "Options Harman EasyTouch",
-        "description": "Modifiez le capteur de puissance ou le profil de ce poêle. Pour modifier le JSON du profil, cochez « Modifier le JSON du profil » puis sélectionnez Soumettre.",
+        "description": "Modifiez le capteur de puissance ou le profil de ce poêle, ainsi que la durée de conservation du dernier état lorsque le capteur est indisponible. Pour modifier le JSON du profil, cochez « Modifier le JSON du profil » puis sélectionnez Soumettre.",
         "data": {
           "source_entity": "Surveillance de la puissance du poêle à granules (watts)",
           "profile": "Profil du poêle",
+          "unavailable_delay": "Conserver le dernier état si le capteur est indisponible (secondes)",
           "edit_profile": "Modifier le JSON du profil"
         },
         "data_description": {
           "source_entity": "Un capteur qui indique la puissance électrique consommée par le poêle en watts, par exemple une prise intelligente ou un moniteur d'énergie. Il sert uniquement à calculer la moyenne mobile sur 20 secondes.",
           "profile": "Les seuils et les délais servant à déterminer l'état du poêle.",
+          "unavailable_delay": "Durée pendant laquelle le dernier état reste affiché après que le capteur de puissance devient indisponible, y compris pendant son démarrage après un redémarrage de Home Assistant. Mettez 0 pour afficher le poêle comme indisponible immédiatement.",
           "edit_profile": "Cochez cette case puis sélectionnez Soumettre pour ouvrir l'éditeur JSON du profil sélectionné. Les profils intégrés sont enregistrés comme copie sous un nouveau nom."
         }
       },

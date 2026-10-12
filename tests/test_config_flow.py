@@ -19,6 +19,7 @@ from custom_components.harman_easytouch_resolver.const import (
     CONF_PROFILE,
     CONF_PROFILE_JSON,
     CONF_SOURCE,
+    CONF_UNAVAILABLE_DELAY,
     DOMAIN,
     IMPORT_NEW,
 )
@@ -233,8 +234,14 @@ async def test_options_form_is_the_main_window(hass: HomeAssistant) -> None:
     result = await _options(hass, entry)
     assert result["type"] is FlowResultType.FORM  # a form, not a menu
     assert result["step_id"] == "init"
-    assert _field_names(result) == [CONF_SOURCE, CONF_PROFILE, CONF_EDIT_PROFILE]
+    assert _field_names(result) == [
+        CONF_SOURCE,
+        CONF_PROFILE,
+        CONF_UNAVAILABLE_DELAY,
+        CONF_EDIT_PROFILE,
+    ]
     assert _suggested(result, CONF_SOURCE) == SOURCE
+    assert _suggested(result, CONF_UNAVAILABLE_DELAY) == 60  # default for older entries
     assert _suggested(result, CONF_PROFILE) == "Allure 50"
 
 
@@ -248,8 +255,50 @@ async def test_options_change_sensor_and_profile(hass: HomeAssistant) -> None:
         {CONF_SOURCE: OTHER_SOURCE, CONF_PROFILE: "Mine", CONF_EDIT_PROFILE: False},
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options == {CONF_SOURCE: OTHER_SOURCE, CONF_PROFILE: "Mine"}
+    assert entry.options == {
+        CONF_SOURCE: OTHER_SOURCE,
+        CONF_PROFILE: "Mine",
+        CONF_UNAVAILABLE_DELAY: 60,
+    }
     assert CONF_EDIT_PROFILE not in entry.options  # a UI toggle, never stored
+
+
+async def test_options_unavailable_delay_is_saved(hass: HomeAssistant) -> None:
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await _options(hass, entry)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {
+            CONF_SOURCE: SOURCE,
+            CONF_PROFILE: "Allure 50",
+            CONF_UNAVAILABLE_DELAY: 180,
+            CONF_EDIT_PROFILE: False,
+        },
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options[CONF_UNAVAILABLE_DELAY] == 180
+
+
+async def test_options_unavailable_delay_survives_profile_edit(hass: HomeAssistant) -> None:
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await _options(hass, entry)
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"],
+        {
+            CONF_SOURCE: SOURCE,
+            CONF_PROFILE: "Allure 50",
+            CONF_UNAVAILABLE_DELAY: 0,
+            CONF_EDIT_PROFILE: True,
+        },
+    )
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {CONF_PROFILE_JSON: _profile_json("Edited")}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options[CONF_UNAVAILABLE_DELAY] == 0
+    assert entry.options[CONF_PROFILE] == "Edited"
 
 
 async def test_options_edit_builtin_profile_saves_a_copy(hass: HomeAssistant) -> None:
@@ -269,7 +318,11 @@ async def test_options_edit_builtin_profile_saves_a_copy(hass: HomeAssistant) ->
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     # The sensor chosen on the first page is kept, and the new profile is applied.
-    assert entry.options == {CONF_SOURCE: OTHER_SOURCE, CONF_PROFILE: "My Allure"}
+    assert entry.options == {
+        CONF_SOURCE: OTHER_SOURCE,
+        CONF_PROFILE: "My Allure",
+        CONF_UNAVAILABLE_DELAY: 60,
+    }
     store = await async_get_profile_store(hass)
     assert store.get("My Allure").thresholds["ignite"] == 160
 
@@ -340,6 +393,11 @@ async def test_reimporting_the_same_name_reloads_this_stove(hass: HomeAssistant)
     await async_save_profile(hass, Profile.from_dict(json.loads(_profile_json("Mine"))))
     entry = _entry(profile="Mine")
     entry.add_to_hass(hass)
+    # The saved options must be identical for the explicit reload to be needed, so this
+    # entry already has the delay option (older entries get it added on first save).
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_UNAVAILABLE_DELAY: 60}
+    )
     with patch(
         "homeassistant.config_entries.ConfigEntries.async_schedule_reload"
     ) as reload:

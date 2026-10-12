@@ -39,15 +39,17 @@
     "step": {
       "init": {
         "title": "Opsiynau Harman EasyTouch",
-        "description": "Newidiwch synhwyrydd pŵer neu broffil y stôf hon. I olygu JSON y proffil, ticiwch \"Golygu JSON y proffil\" a dewiswch Cyflwyno.",
+        "description": "Newidiwch synhwyrydd pŵer neu broffil y stôf hon, a pha mor hir i gadw'r cyflwr diwethaf pan fydd y synhwyrydd yn methu. I olygu JSON y proffil, ticiwch \"Golygu JSON y proffil\" a dewiswch Cyflwyno.",
         "data": {
           "source_entity": "Monitro pŵer ar gyfer y stôf belenni (watiau)",
           "profile": "Proffil y stôf",
+          "unavailable_delay": "Cadw'r cyflwr diwethaf pan fydd y synhwyrydd yn methu (eiliadau)",
           "edit_profile": "Golygu JSON y proffil"
         },
         "data_description": {
           "source_entity": "Synhwyrydd sy'n adrodd faint o bŵer trydanol y mae'r stôf yn ei dynnu mewn watiau, er enghraifft o blwg clyfar neu fonitor ynni. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad.",
           "profile": "Y trothwyon a'r amseriadau a ddefnyddir i weithio allan cyflwr y stôf.",
+          "unavailable_delay": "Am ba hyd i barhau i ddangos y cyflwr diwethaf ar ôl i'r synhwyrydd pŵer fynd yn anhygyrch, gan gynnwys tra bydd yn cychwyn ar ôl ailgychwyn Home Assistant. Gosodwch i 0 i ddangos y stôf fel un anhygyrch ar unwaith.",
           "edit_profile": "Ticiwch hwn a dewiswch Cyflwyno i agor y golygydd JSON ar gyfer y proffil a ddewiswyd. Caiff proffiliau adeiledig eu cadw fel copi o dan enw newydd."
         }
       },

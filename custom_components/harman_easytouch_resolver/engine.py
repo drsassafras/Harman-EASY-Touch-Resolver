@@ -67,6 +67,15 @@ class StoveEngine:
         self.moving_average = None
         self.raw_state = None
 
+    def restart_window(self) -> None:
+        """Readings stopped for longer than the window: require a fresh full window.
+
+        Keeps the resolved and raw state, so a short outage does not look like a restart.
+        """
+        self._samples.clear()
+        self._first_sample_at = None
+        self.moving_average = None
+
     def shutdown(self) -> None:
         self._cancel_pending()
 

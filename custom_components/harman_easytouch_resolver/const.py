@@ -6,6 +6,7 @@ CONF_SOURCE = "source_entity"
 CONF_PROFILE = "profile"
 CONF_PROFILE_JSON = "profile_json"
 CONF_EDIT_PROFILE = "edit_profile"
+CONF_UNAVAILABLE_DELAY = "unavailable_delay"
 
 DEFAULT_PROFILE = "Allure 50"
 
@@ -13,6 +14,12 @@ DEFAULT_PROFILE = "Allure 50"
 MOVING_AVERAGE_SECONDS = 20
 # After a restart / source recovery, wait this long before syncing to the raw state.
 STARTUP_SYNC_SECONDS = 30
+
+# How long the last state is kept (entities stay available) after the power sensor
+# becomes unavailable or invalid, including while it comes online after a restart.
+# 0 turns the grace period off: entities go unavailable immediately.
+DEFAULT_UNAVAILABLE_DELAY = 60
+MAX_UNAVAILABLE_DELAY = 600
 
 # Timing used for a state a profile does not configure (matches the old automation).
 DEFAULT_TIMING = {"sequp": 3, "seqdown": 3, "nonseq": 3}

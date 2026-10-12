@@ -13,6 +13,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
+    NumberSelector,
+    NumberSelectorConfig,
+    NumberSelectorMode,
     SelectOptionDict,
     SelectSelector,
     SelectSelectorConfig,
@@ -27,9 +30,12 @@ from .const import (
     CONF_PROFILE,
     CONF_PROFILE_JSON,
     CONF_SOURCE,
+    CONF_UNAVAILABLE_DELAY,
     DEFAULT_PROFILE,
+    DEFAULT_UNAVAILABLE_DELAY,
     DOMAIN,
     IMPORT_NEW,
+    MAX_UNAVAILABLE_DELAY,
 )
 from .profile import (
     ALLURE_50,
@@ -44,6 +50,15 @@ from .profiles import async_get_profile_store, async_save_profile
 # Only offer power sensors (watts).
 _SOURCE_SELECTOR = EntitySelector(
     EntitySelectorConfig(domain="sensor", device_class=SensorDeviceClass.POWER)
+)
+_DELAY_SELECTOR = NumberSelector(
+    NumberSelectorConfig(
+        min=0,
+        max=MAX_UNAVAILABLE_DELAY,
+        step=1,
+        mode=NumberSelectorMode.BOX,
+        unit_of_measurement="s",
+    )
 )
 _JSON_SELECTOR = TextSelector(TextSelectorConfig(multiline=True))
 
@@ -169,6 +184,7 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
     def __init__(self) -> None:
         self._source: str | None = None
         self._profile: str | None = None
+        self._delay: int = DEFAULT_UNAVAILABLE_DELAY
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -185,6 +201,7 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
             else:
                 self._source = user_input[CONF_SOURCE]
                 self._profile = user_input[CONF_PROFILE]
+                self._delay = int(user_input[CONF_UNAVAILABLE_DELAY])
                 if user_input.get(CONF_EDIT_PROFILE):
                     return await self.async_step_import_profile()
                 return self.async_create_entry(
@@ -192,6 +209,7 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
                         **options,
                         CONF_SOURCE: self._source,
                         CONF_PROFILE: self._profile,
+                        CONF_UNAVAILABLE_DELAY: self._delay,
                     }
                 )
 
@@ -199,12 +217,18 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
             {
                 vol.Required(CONF_SOURCE): _SOURCE_SELECTOR,
                 vol.Required(CONF_PROFILE): _profile_selector(store.names),
+                vol.Required(
+                    CONF_UNAVAILABLE_DELAY, default=DEFAULT_UNAVAILABLE_DELAY
+                ): _DELAY_SELECTOR,
                 vol.Optional(CONF_EDIT_PROFILE, default=False): bool,
             }
         )
         suggested = user_input or {
             CONF_SOURCE: options.get(CONF_SOURCE),
             CONF_PROFILE: options.get(CONF_PROFILE, DEFAULT_PROFILE),
+            CONF_UNAVAILABLE_DELAY: options.get(
+                CONF_UNAVAILABLE_DELAY, DEFAULT_UNAVAILABLE_DELAY
+            ),
         }
         return self.async_show_form(
             step_id="init",
@@ -252,6 +276,7 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
             **self.config_entry.options,
             CONF_SOURCE: self._source or self.config_entry.options.get(CONF_SOURCE),
             CONF_PROFILE: profile.name,
+            CONF_UNAVAILABLE_DELAY: self._delay,
         }
         if options == self.config_entry.options:
             # Same name re-imported: options don't change, so reload explicitly.

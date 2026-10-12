@@ -39,15 +39,17 @@
     "step": {
       "init": {
         "title": "Roghanna Harman EasyTouch",
-        "description": "Athraigh braiteoir cumhachta nó próifíl an sparáin seo. Chun JSON na próifíle a chur in eagar, cuir tic le \"Cuir JSON na próifíle in eagar\" agus roghnaigh Seol.",
+        "description": "Athraigh braiteoir cumhachta nó próifíl an sparáin seo, agus cé chomh fada is a choinnítear an staid dheireanach nuair a thiteann an braiteoir amach. Chun JSON na próifíle a chur in eagar, cuir tic le \"Cuir JSON na próifíle in eagar\" agus roghnaigh Seol.",
         "data": {
           "source_entity": "Monatóireacht cumhachta don sparán peiléad (vata)",
           "profile": "Próifíl an sparáin",
+          "unavailable_delay": "Coinnigh an staid dheireanach nuair a thiteann an braiteoir amach (soicindí)",
           "edit_profile": "Cuir JSON na próifíle in eagar"
         },
         "data_description": {
           "source_entity": "Braiteoir a thuairiscíonn tarraingt cumhachta leictrí an sparáin i vataí, mar shampla ó phlocóid chliste nó ó mhonatóir fuinnimh. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin.",
           "profile": "Na tairseacha agus na hamanna a úsáidtear chun staid an sparáin a oibriú amach.",
+          "unavailable_delay": "Cé chomh fada is a leanfar den staid dheireanach a thaispeáint tar éis don bhraiteoir cumhachta dul as ar fáil, lena n-áirítear nuair a thosaíonn sé tar éis Home Assistant a atosú. Socraigh ar 0 chun an sparán a thaispeáint mar nach bhfuil ar fáil láithreach.",
           "edit_profile": "Cuir tic anseo agus roghnaigh Seol chun eagarthóir JSON na próifíle roghnaithe a oscailt. Sábháiltear próifílí ionsuite mar chóip faoi ainm nua."
         }
       },

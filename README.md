@@ -128,14 +128,16 @@ A state that has no entry in `timings` at all waits 3 seconds for every kind of 
 
 - The 20 second moving average is fixed because of the stove's 10 second power cycle.
 - After a restart, or when the power sensor comes back from unavailable, the integration waits for a full 20 seconds of data before resolving a state. The previous resolved state is remembered, and the first reading that disagrees with it is applied after 30 seconds.
-- While the power sensor is unavailable or not a number, all three entities show as unavailable.
+- When the power sensor becomes unavailable or not a number, all three entities keep showing the last state for the **Keep last state when the sensor drops out** time (60 seconds by default, 0 to 600 in the options). Only if the sensor is still bad after that do they show as unavailable. Set it to 0 for the old behaviour. A short outage therefore leaves no gap in the history.
+- The same time covers a Home Assistant restart: the last state is restored and shown while the power sensor comes online. If your power sensor takes longer than that to start (for example a Zigbee or MQTT device), raise the value. Time while Home Assistant itself is not running cannot be recorded.
+- If readings were missing for more than 20 seconds, the integration waits for a fresh 20 second window before changing the state.
 - Updates are event driven: the integration reacts to the power sensor's state changes and never polls.
 
 ## Troubleshooting
 
 | Symptom | Likely cause |
 |---|---|
-| Entities are unavailable | The power sensor is unavailable, unknown or not numeric. |
+| Entities are unavailable | The power sensor has been unavailable, unknown or not numeric for longer than the keep-last-state time. |
 | State is `unknown` | Waiting for the first 20 seconds of readings. |
 | State flaps between two levels | Thresholds sit too close to the stove's real power at that level. Check `moving_average` and move the threshold. Increase the timings for that state. |
 | State is stuck on `sensor_fault` | `moving_average` is at or below the profile's `idle` value. Check the sensor's units are watts. |

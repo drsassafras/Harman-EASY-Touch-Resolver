@@ -22,6 +22,7 @@ from unittest.mock import patch
 from custom_components.harman_easytouch_resolver.const import (
     CONF_PROFILE,
     CONF_SOURCE,
+    CONF_UNAVAILABLE_DELAY,
     DOMAIN,
     GENERAL_STATE_OPTIONS,
     ORDER,
@@ -53,12 +54,18 @@ def clock():
         yield clock
 
 
-def _entry(profile: str = "Allure 50", source: str = SOURCE) -> MockConfigEntry:
+def _entry(
+    profile: str = "Allure 50", source: str = SOURCE, delay: int | None = None
+) -> MockConfigEntry:
+    """`delay` is the unavailable grace period; None leaves it out (the 60 s default)."""
+    options = {CONF_SOURCE: source, CONF_PROFILE: profile}
+    if delay is not None:
+        options[CONF_UNAVAILABLE_DELAY] = delay
     return MockConfigEntry(
         domain=DOMAIN,
         title="Pellet stove",
         data={CONF_NAME: "Pellet stove"},
-        options={CONF_SOURCE: source, CONF_PROFILE: profile},
+        options=options,
         unique_id="pellet_stove",
     )
 
@@ -215,7 +222,7 @@ async def test_change_commits_only_after_the_delay(hass: HomeAssistant, clock) -
 async def test_source_unavailable_keeps_resolved_state_but_marks_entities_unavailable(
     hass: HomeAssistant, clock
 ) -> None:
-    await _setup(hass, _entry())
+    await _setup(hass, _entry(delay=0))
     await _settle(hass, clock, 100)
     clock.now = 50
     hass.states.async_set(SOURCE, STATE_UNAVAILABLE)
@@ -230,9 +237,120 @@ async def test_source_unavailable_keeps_resolved_state_but_marks_entities_unavai
     assert hass.states.get(STATE).attributes["raw_state"] == "burn_2"
 
 
+# -- unavailable grace period -----------------------------------------------------------------
+
+
+async def _drop_source(hass: HomeAssistant, clock: Clock, at: float) -> None:
+    clock.now = at
+    hass.states.async_set(SOURCE, STATE_UNAVAILABLE)
+    await hass.async_block_till_done()
+
+
+async def test_short_dropout_keeps_the_last_state(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)
+    await _drop_source(hass, clock, 30)
+    for entity in (STATE, GENERAL, ACTIVE):
+        assert hass.states.get(entity).state != STATE_UNAVAILABLE
+    assert hass.states.get(STATE).state == "burn_2"
+    assert hass.states.get(GENERAL).state == "Burning"
+    assert hass.states.get(ACTIVE).state == STATE_ON
+
+    await _after(hass, 59)
+    assert hass.states.get(STATE).state == "burn_2"  # still inside the grace period
+    await _feed(hass, clock, 100, 40)  # source is back
+    await _after(hass, 120)  # the old grace timer must not fire
+    assert hass.states.get(STATE).state == "burn_2"
+
+
+async def test_dropout_longer_than_the_grace_period_goes_unavailable(
+    hass: HomeAssistant, clock
+) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)
+    await _drop_source(hass, clock, 30)
+    await _after(hass, 61)
+    for entity in (STATE, GENERAL, ACTIVE):
+        assert hass.states.get(entity).state == STATE_UNAVAILABLE
+
+
+async def test_another_bad_reading_mid_grace_changes_nothing(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)
+    await _drop_source(hass, clock, 30)
+    hass.states.async_set(SOURCE, STATE_UNKNOWN)  # a second bad value while waiting
+    await hass.async_block_till_done()
+    assert hass.states.get(STATE).state == "burn_2"  # still showing the last state
+    await _after(hass, 61)
+    assert hass.states.get(STATE).state == STATE_UNAVAILABLE
+    hass.states.async_set(SOURCE, "abc")  # and bad readings once down stay unavailable
+    await hass.async_block_till_done()
+    assert hass.states.get(STATE).state == STATE_UNAVAILABLE
+
+
+async def test_custom_grace_period_is_used(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry(delay=300))
+    await _settle(hass, clock, 100)
+    await _drop_source(hass, clock, 30)
+    await _after(hass, 200)
+    assert hass.states.get(STATE).state == "burn_2"
+    await _after(hass, 301)
+    assert hass.states.get(STATE).state == STATE_UNAVAILABLE
+
+
+async def test_long_gap_inside_grace_needs_a_fresh_window(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)  # burn_2
+    await _drop_source(hass, clock, 30)
+    await _feed(hass, clock, 170, 55)  # back after 25 s: older than the 20 s window
+    assert hass.states.get(STATE).state == "burn_2"
+    assert hass.states.get(STATE).attributes["moving_average"] == 170.0
+    assert hass.states.get(STATE).attributes["raw_state"] == "burn_2"  # not judged on 1 sample
+    await _feed(hass, clock, 170, 76)  # full window again
+    assert hass.states.get(STATE).attributes["raw_state"] == "ignite"
+
+
+# -- restart: restored state is shown while the power sensor comes online ----------------------
+
+
+async def test_restart_shows_restored_state_until_the_source_appears(
+    hass: HomeAssistant, clock
+) -> None:
+    mock_restore_cache(hass, [State(STATE, "burn_4")])
+    await _setup(hass, _entry())  # the power sensor does not exist yet
+    for entity in (STATE, GENERAL, ACTIVE):
+        assert hass.states.get(entity).state != STATE_UNAVAILABLE
+    assert hass.states.get(STATE).state == "burn_4"
+
+    await _after(hass, 30)
+    assert hass.states.get(STATE).state == "burn_4"
+    await _feed(hass, clock, 100, 35)  # the power sensor finally comes online
+    assert hass.states.get(STATE).state == "burn_4"  # still the restored state
+    await _after(hass, 300)  # the startup grace timer must not fire now
+    assert hass.states.get(STATE).state != STATE_UNAVAILABLE
+
+
+async def test_restart_with_a_source_that_never_appears_goes_unavailable(
+    hass: HomeAssistant, clock
+) -> None:
+    mock_restore_cache(hass, [State(STATE, "burn_4")])
+    await _setup(hass, _entry())
+    await _after(hass, 61)
+    for entity in (STATE, GENERAL, ACTIVE):
+        assert hass.states.get(entity).state == STATE_UNAVAILABLE
+
+
+async def test_restart_with_grace_off_is_unavailable_immediately(
+    hass: HomeAssistant, clock
+) -> None:
+    mock_restore_cache(hass, [State(STATE, "burn_4")])
+    await _setup(hass, _entry(delay=0))
+    assert hass.states.get(STATE).state == STATE_UNAVAILABLE
+
+
 @pytest.mark.parametrize("bad", ["abc", "nan", "inf", "-inf", STATE_UNKNOWN])
 async def test_non_numeric_source_is_unavailable(hass: HomeAssistant, clock, bad) -> None:
-    await _setup(hass, _entry())
+    await _setup(hass, _entry(delay=0))
     await _settle(hass, clock, 100)
     clock.now = 50
     hass.states.async_set(SOURCE, bad, POWER_ATTRS)
