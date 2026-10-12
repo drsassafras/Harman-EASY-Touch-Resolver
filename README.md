@@ -24,8 +24,14 @@ Each stove you add creates one device with:
 | Entity | Description |
 |---|---|
 | **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. Has `raw_state` and `moving_average` attributes. |
-| **General state** (sensor) | A simplified view: `Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle`. |
-| **Active** (binary sensor) | On while the general state is `Lighting` or `Burning`. |
+| **General state** (sensor) | A simplified view: `faulted`, `lighting`, `burning`, `cooldown`, `idle`. Shown translated in your language. |
+| **Active** (binary sensor) | On while the general state is `lighting` or `burning`. |
+
+## Upgrading to 0.3.0 (breaking change)
+
+The **General state** sensor's values changed from `Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle` to the lowercase `faulted`, `lighting`, `burning`, `cooldown`, `idle`, so Home Assistant can translate them. Update anything that compares against the old values: automations, templates, scripts, dashboards and conditional cards. Look for the old capitalised words.
+
+History from before the upgrade keeps the old values, so a history graph shows both. The **State** sensor and the **Active** binary sensor are unchanged.
 
 ## Use cases
 
@@ -96,7 +102,7 @@ Notify when the stove faults:
 triggers:
   - trigger: state
     entity_id: sensor.living_room_stove_general_state
-    to: "Faulted"
+    to: "faulted"
 actions:
   - action: notify.notify
     data:
@@ -187,7 +193,7 @@ A state that has no entry in `timings` at all waits 3 seconds for every kind of 
 - The 20 second averaging window is fixed because of the stove's 10 second power cycle.
 - A state is only known after the first full 20 seconds of readings.
 - The history has a gap while Home Assistant itself is not running. The keep-last-state time only covers the power sensor coming back late.
-- The **General state** values (`Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle`) are shown in English in every language, because Home Assistant cannot translate state values that start with a capital letter. The **State** sensor and all entity names are translated.
+- Entity names and the states of both sensors are translated, but the underlying state values (for example `burn_2` or `burning`) are fixed, so automations keep working in every language.
 
 ## Diagnostics and repairs
 
@@ -207,6 +213,10 @@ A state that has no entry in `timings` at all waits 3 seconds for every kind of 
 ## Translations
 
 English, Canadian French, Irish and Welsh. The Irish and Welsh have not been reviewed by native speakers; corrections are welcome.
+
+Translated: entity names, every state of both sensors, the names and values of the **State** sensor's attributes, the setup, options and reconfigure forms (including the profile dropdown entry and every profile error message), and repair messages.
+
+Not translated: log messages, diagnostics and this README, because Home Assistant does not translate those, and the keys of the profile JSON (`name`, `thresholds`, `timings` and the state names inside them), which are fixed.
 
 ## Development
 

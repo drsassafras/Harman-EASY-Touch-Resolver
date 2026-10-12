@@ -136,8 +136,8 @@ async def test_import_rejects_bad_json(hass: HomeAssistant, mock_setup_entry) ->
         result["flow_id"], {CONF_PROFILE_JSON: "{ nope"}
     )
     assert result["type"] is FlowResultType.FORM
-    assert result["errors"] == {"base": "invalid_profile"}
-    assert "not valid JSON" in result["description_placeholders"]["error"]
+    assert result["errors"] == {"base": "profile_json_invalid"}
+    assert result["description_placeholders"]["line"] == "1"
     assert _suggested(result, CONF_PROFILE_JSON) == "{ nope"  # the user's text is kept
     mock_setup_entry.assert_not_called()
 
@@ -149,8 +149,7 @@ async def test_import_rejects_invalid_profile(hass: HomeAssistant, mock_setup_en
     result = await hass.config_entries.flow.async_configure(
         result["flow_id"], {CONF_PROFILE_JSON: json.dumps(bad)}
     )
-    assert result["errors"] == {"base": "invalid_profile"}
-    assert "strictly decrease" in result["description_placeholders"]["error"]
+    assert result["errors"] == {"base": "profile_thresholds_order"}
 
 
 async def test_import_rejects_builtin_name(hass: HomeAssistant, mock_setup_entry) -> None:
@@ -352,7 +351,7 @@ async def test_options_edit_errors_and_retry(hass: HomeAssistant) -> None:
     result = await hass.config_entries.options.async_configure(
         result["flow_id"], {CONF_PROFILE_JSON: "[]"}
     )
-    assert result["errors"] == {"base": "invalid_profile"}
+    assert result["errors"] == {"base": "profile_not_object"}
     result = await hass.config_entries.options.async_configure(
         result["flow_id"], {CONF_PROFILE_JSON: _profile_json("Allure 50")}
     )

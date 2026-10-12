@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Ajouter un poêle Harman EasyTouch",
-        "description": "Choisissez le capteur de puissance (watts) de ce poêle. Il sert uniquement à calculer la moyenne mobile sur 20 secondes. Choisissez un profil existant, ou « Import / design a new profile » pour passer à l'éditeur de profil.",
+        "description": "Choisissez le capteur de puissance (watts) de ce poêle. Il sert uniquement à calculer la moyenne mobile sur 20 secondes. Choisissez un profil existant, ou « Importer / concevoir un nouveau profil » pour passer à l'éditeur de profil.",
         "data": {
           "name": "Nom du poêle",
           "source_entity": "Surveillance de la puissance du poêle à granules (watts)",
@@ -12,7 +12,7 @@
         "data_description": {
           "name": "Un nom pour ce poêle, par exemple « Poêle du salon ».",
           "source_entity": "Un capteur qui indique la puissance électrique consommée par le poêle en watts, par exemple une prise intelligente ou un moniteur d'énergie. Il sert uniquement à calculer la moyenne mobile sur 20 secondes.",
-          "profile": "Les seuils et les délais servant à déterminer l'état du poêle. Choisissez un profil, ou « Import / design a new profile… » pour ouvrir l'éditeur JSON."
+          "profile": "Les seuils et les délais servant à déterminer l'état du poêle. Choisissez un profil, ou « Importer / concevoir un nouveau profil… » pour ouvrir l'éditeur JSON."
         }
       },
       "import_profile": {
@@ -37,9 +37,24 @@
       }
     },
     "error": {
-      "invalid_profile": "Le profil n'est pas valide : {error}",
       "reserved_name": "Ce nom appartient à un profil intégré. Utilisez un « name » différent.",
-      "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle."
+      "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle.",
+      "profile_json_invalid": "Le profil n'est pas un JSON valide (problème près de la ligne {line}, colonne {column}).",
+      "profile_not_object": "Le profil doit être un objet JSON.",
+      "profile_name_invalid": "« name » doit être une chaîne non vide.",
+      "profile_thresholds_not_object": "« thresholds » doit être un objet.",
+      "profile_threshold_missing": "Le seuil de « {state} » est manquant.",
+      "profile_threshold_not_number": "Le seuil de « {state} » doit être un nombre.",
+      "profile_threshold_not_finite": "Le seuil de « {state} » doit être un nombre fini.",
+      "profile_threshold_unknown": "États de seuil inconnus : {states}.",
+      "profile_thresholds_order": "Les seuils doivent diminuer strictement de « ignite » à « idle ».",
+      "profile_timings_not_object": "« timings » doit être un objet.",
+      "profile_timing_unknown_state": "État inconnu dans timings : « {state} ».",
+      "profile_timing_state_not_object": "Les délais de « {state} » doivent former un objet.",
+      "profile_timing_unknown_key": "Délai inconnu « {key} » pour « {state} ».",
+      "profile_timing_not_number": "Le délai « {key} » de « {state} » doit être un nombre.",
+      "profile_timing_not_finite": "Le délai « {key} » de « {state} » doit être un nombre fini.",
+      "profile_timing_negative": "Le délai « {key} » de « {state} » doit être 0 ou plus."
     },
     "abort": {
       "already_configured": "Un poêle portant ce nom existe déjà.",
@@ -76,9 +91,31 @@
       }
     },
     "error": {
-      "invalid_profile": "Le profil n'est pas valide : {error}",
       "reserved_name": "Ce nom appartient à un profil intégré. Utilisez un « name » différent.",
-      "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle."
+      "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle.",
+      "profile_json_invalid": "Le profil n'est pas un JSON valide (problème près de la ligne {line}, colonne {column}).",
+      "profile_not_object": "Le profil doit être un objet JSON.",
+      "profile_name_invalid": "« name » doit être une chaîne non vide.",
+      "profile_thresholds_not_object": "« thresholds » doit être un objet.",
+      "profile_threshold_missing": "Le seuil de « {state} » est manquant.",
+      "profile_threshold_not_number": "Le seuil de « {state} » doit être un nombre.",
+      "profile_threshold_not_finite": "Le seuil de « {state} » doit être un nombre fini.",
+      "profile_threshold_unknown": "États de seuil inconnus : {states}.",
+      "profile_thresholds_order": "Les seuils doivent diminuer strictement de « ignite » à « idle ».",
+      "profile_timings_not_object": "« timings » doit être un objet.",
+      "profile_timing_unknown_state": "État inconnu dans timings : « {state} ».",
+      "profile_timing_state_not_object": "Les délais de « {state} » doivent former un objet.",
+      "profile_timing_unknown_key": "Délai inconnu « {key} » pour « {state} ».",
+      "profile_timing_not_number": "Le délai « {key} » de « {state} » doit être un nombre.",
+      "profile_timing_not_finite": "Le délai « {key} » de « {state} » doit être un nombre fini.",
+      "profile_timing_negative": "Le délai « {key} » de « {state} » doit être 0 ou plus."
+    }
+  },
+  "selector": {
+    "profile": {
+      "options": {
+        "import_new": "Importer / concevoir un nouveau profil…"
+      }
     }
   },
   "entity": {
@@ -99,10 +136,40 @@
           "burn_5": "Combustion 5",
           "burn_6": "Combustion 6",
           "ignite": "Allumage"
+        },
+        "state_attributes": {
+          "raw_state": {
+            "name": "État brut",
+            "state": {
+              "sensor_fault": "Défaut du capteur",
+              "idle": "Au repos",
+              "extinguish": "Extinction",
+              "post_ignite": "Post-allumage",
+              "fault_extinguish": "Extinction sur défaut",
+              "cool_down": "Refroidissement",
+              "burn_1": "Combustion 1",
+              "burn_2": "Combustion 2",
+              "burn_3": "Combustion 3",
+              "burn_4": "Combustion 4",
+              "burn_5": "Combustion 5",
+              "burn_6": "Combustion 6",
+              "ignite": "Allumage"
+            }
+          },
+          "moving_average": {
+            "name": "Moyenne mobile"
+          }
         }
       },
       "general_state": {
-        "name": "État général"
+        "name": "État général",
+        "state": {
+          "faulted": "En défaut",
+          "lighting": "Allumage",
+          "burning": "Combustion",
+          "cooldown": "Refroidissement",
+          "idle": "Au repos"
+        }
       }
     },
     "binary_sensor": {

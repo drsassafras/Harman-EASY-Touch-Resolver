@@ -178,8 +178,7 @@ async def test_burning_state(hass: HomeAssistant, clock) -> None:
     assert hass.states.get(STATE).state == "burn_2"
     assert hass.states.get(STATE).attributes["raw_state"] == "burn_2"
     assert hass.states.get(STATE).attributes["moving_average"] == 100.0
-    assert hass.states.get(GENERAL).state == "Burning"
-    assert hass.states.get(GENERAL).attributes["icon"] == "mdi:fire"
+    assert hass.states.get(GENERAL).state == "burning"
     assert hass.states.get(ACTIVE).state == STATE_ON
 
 
@@ -187,8 +186,7 @@ async def test_idle_state(hass: HomeAssistant, clock) -> None:
     await _setup(hass, _entry())
     await _settle(hass, clock, 3)
     assert hass.states.get(STATE).state == "idle"
-    assert hass.states.get(GENERAL).state == "Idle"
-    assert hass.states.get(GENERAL).attributes["icon"] == "mdi:fireplace-off"
+    assert hass.states.get(GENERAL).state == "idle"
     assert hass.states.get(ACTIVE).state == STATE_OFF
 
 
@@ -197,7 +195,7 @@ async def test_ignite_is_lighting_and_active(hass: HomeAssistant, clock) -> None
     await _settle(hass, clock, 100)
     await _feed(hass, clock, 170, 42)  # jump to ignite: no wait configured
     assert hass.states.get(STATE).state == "ignite"
-    assert hass.states.get(GENERAL).state == "Lighting"
+    assert hass.states.get(GENERAL).state == "lighting"
     assert hass.states.get(ACTIVE).state == STATE_ON
 
 
@@ -205,7 +203,7 @@ async def test_fault_is_not_active(hass: HomeAssistant, clock) -> None:
     await _setup(hass, _entry())
     await _settle(hass, clock, 0.5)
     assert hass.states.get(STATE).state == "sensor_fault"
-    assert hass.states.get(GENERAL).state == "Faulted"
+    assert hass.states.get(GENERAL).state == "faulted"
     assert hass.states.get(ACTIVE).state == STATE_OFF
 
 
@@ -258,7 +256,7 @@ async def test_short_dropout_keeps_the_last_state(hass: HomeAssistant, clock) ->
     for entity in (STATE, GENERAL, ACTIVE):
         assert hass.states.get(entity).state != STATE_UNAVAILABLE
     assert hass.states.get(STATE).state == "burn_2"
-    assert hass.states.get(GENERAL).state == "Burning"
+    assert hass.states.get(GENERAL).state == "burning"
     assert hass.states.get(ACTIVE).state == STATE_ON
 
     await _after(hass, 59)
@@ -415,7 +413,7 @@ async def test_saved_custom_profile_is_used(hass: HomeAssistant, hass_storage, c
     await _setup(hass, _entry(profile="Double"))
     await _settle(hass, clock, 100)  # 100 W is only "fault_extinguish" on this profile
     assert hass.states.get(STATE).state == "fault_extinguish"
-    assert hass.states.get(GENERAL).state == "Faulted"
+    assert hass.states.get(GENERAL).state == "faulted"
 
 
 async def test_changing_options_reloads_with_the_new_sensor(hass: HomeAssistant, clock) -> None:

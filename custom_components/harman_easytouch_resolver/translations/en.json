@@ -37,9 +37,24 @@
       }
     },
     "error": {
-      "invalid_profile": "The profile is not valid: {error}",
       "reserved_name": "That name belongs to a built-in profile. Use a different \"name\".",
-      "source_in_use": "That power sensor is already used by another stove."
+      "source_in_use": "That power sensor is already used by another stove.",
+      "profile_json_invalid": "The profile is not valid JSON (problem near line {line}, column {column}).",
+      "profile_not_object": "The profile must be a JSON object.",
+      "profile_name_invalid": "\"name\" must be a non-empty string.",
+      "profile_thresholds_not_object": "\"thresholds\" must be an object.",
+      "profile_threshold_missing": "The threshold for \"{state}\" is missing.",
+      "profile_threshold_not_number": "The threshold for \"{state}\" must be a number.",
+      "profile_threshold_not_finite": "The threshold for \"{state}\" must be a finite number.",
+      "profile_threshold_unknown": "Unknown threshold state(s): {states}.",
+      "profile_thresholds_order": "Thresholds must strictly decrease from \"ignite\" down to \"idle\".",
+      "profile_timings_not_object": "\"timings\" must be an object.",
+      "profile_timing_unknown_state": "Unknown state in timings: \"{state}\".",
+      "profile_timing_state_not_object": "The timings for \"{state}\" must be an object.",
+      "profile_timing_unknown_key": "Unknown timing \"{key}\" for \"{state}\".",
+      "profile_timing_not_number": "The timing \"{key}\" for \"{state}\" must be a number.",
+      "profile_timing_not_finite": "The timing \"{key}\" for \"{state}\" must be a finite number.",
+      "profile_timing_negative": "The timing \"{key}\" for \"{state}\" must be 0 or more."
     },
     "abort": {
       "already_configured": "A stove with this name already exists.",
@@ -76,9 +91,31 @@
       }
     },
     "error": {
-      "invalid_profile": "The profile is not valid: {error}",
       "reserved_name": "That name belongs to a built-in profile. Use a different \"name\".",
-      "source_in_use": "That power sensor is already used by another stove."
+      "source_in_use": "That power sensor is already used by another stove.",
+      "profile_json_invalid": "The profile is not valid JSON (problem near line {line}, column {column}).",
+      "profile_not_object": "The profile must be a JSON object.",
+      "profile_name_invalid": "\"name\" must be a non-empty string.",
+      "profile_thresholds_not_object": "\"thresholds\" must be an object.",
+      "profile_threshold_missing": "The threshold for \"{state}\" is missing.",
+      "profile_threshold_not_number": "The threshold for \"{state}\" must be a number.",
+      "profile_threshold_not_finite": "The threshold for \"{state}\" must be a finite number.",
+      "profile_threshold_unknown": "Unknown threshold state(s): {states}.",
+      "profile_thresholds_order": "Thresholds must strictly decrease from \"ignite\" down to \"idle\".",
+      "profile_timings_not_object": "\"timings\" must be an object.",
+      "profile_timing_unknown_state": "Unknown state in timings: \"{state}\".",
+      "profile_timing_state_not_object": "The timings for \"{state}\" must be an object.",
+      "profile_timing_unknown_key": "Unknown timing \"{key}\" for \"{state}\".",
+      "profile_timing_not_number": "The timing \"{key}\" for \"{state}\" must be a number.",
+      "profile_timing_not_finite": "The timing \"{key}\" for \"{state}\" must be a finite number.",
+      "profile_timing_negative": "The timing \"{key}\" for \"{state}\" must be 0 or more."
+    }
+  },
+  "selector": {
+    "profile": {
+      "options": {
+        "import_new": "Import / design a new profile…"
+      }
     }
   },
   "entity": {
@@ -99,10 +136,40 @@
           "burn_5": "Burn 5",
           "burn_6": "Burn 6",
           "ignite": "Ignite"
+        },
+        "state_attributes": {
+          "raw_state": {
+            "name": "Raw state",
+            "state": {
+              "sensor_fault": "Sensor fault",
+              "idle": "Idle",
+              "extinguish": "Extinguish",
+              "post_ignite": "Post ignite",
+              "fault_extinguish": "Fault extinguish",
+              "cool_down": "Cool down",
+              "burn_1": "Burn 1",
+              "burn_2": "Burn 2",
+              "burn_3": "Burn 3",
+              "burn_4": "Burn 4",
+              "burn_5": "Burn 5",
+              "burn_6": "Burn 6",
+              "ignite": "Ignite"
+            }
+          },
+          "moving_average": {
+            "name": "Moving average"
+          }
         }
       },
       "general_state": {
-        "name": "General state"
+        "name": "General state",
+        "state": {
+          "faulted": "Faulted",
+          "lighting": "Lighting",
+          "burning": "Burning",
+          "cooldown": "Cooldown",
+          "idle": "Idle"
+        }
       }
     },
     "binary_sensor": {

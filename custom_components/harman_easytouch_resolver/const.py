@@ -60,24 +60,24 @@ THRESHOLD_ORDER = [
 ]
 
 GENERAL_STATE_MAP = {
-    "sensor_fault": "Faulted",
-    "fault_extinguish": "Faulted",
-    "ignite": "Lighting",
-    "post_ignite": "Lighting",
-    "burn_1": "Burning",
-    "burn_2": "Burning",
-    "burn_3": "Burning",
-    "burn_4": "Burning",
-    "burn_5": "Burning",
-    "burn_6": "Burning",
-    "extinguish": "Cooldown",
-    "cool_down": "Cooldown",
-    "idle": "Idle",
+    "sensor_fault": "faulted",
+    "fault_extinguish": "faulted",
+    "ignite": "lighting",
+    "post_ignite": "lighting",
+    "burn_1": "burning",
+    "burn_2": "burning",
+    "burn_3": "burning",
+    "burn_4": "burning",
+    "burn_5": "burning",
+    "burn_6": "burning",
+    "extinguish": "cooldown",
+    "cool_down": "cooldown",
+    "idle": "idle",
 }
-GENERAL_STATE_OPTIONS = ["Faulted", "Lighting", "Burning", "Cooldown", "Idle"]
+GENERAL_STATE_OPTIONS = ["faulted", "lighting", "burning", "cooldown", "idle"]
 
 # The binary sensor is on when the general state is one of these.
-ACTIVE_GENERAL_STATES = {"Lighting", "Burning"}
+ACTIVE_GENERAL_STATES = {"lighting", "burning"}
 
 # Dropdown value that means "let me import / design a new profile".
-IMPORT_NEW = "__import_new__"
+IMPORT_NEW = "import_new"

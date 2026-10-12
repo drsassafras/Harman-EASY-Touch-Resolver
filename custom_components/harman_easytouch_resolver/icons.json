@@ -20,7 +20,14 @@
         }
       },
       "general_state": {
-        "default": "mdi:fireplace"
+        "default": "mdi:fireplace",
+        "state": {
+          "faulted": "mdi:alert-circle",
+          "lighting": "mdi:fire-circle",
+          "burning": "mdi:fire",
+          "cooldown": "mdi:fire-off",
+          "idle": "mdi:fireplace-off"
+        }
       }
     },
     "binary_sensor": {

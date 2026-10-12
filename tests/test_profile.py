@@ -153,3 +153,25 @@ def test_template_json_keeps_custom_name():
 
 def test_builtin_registry():
     assert BUILTIN_PROFILES == {"Allure 50": ALLURE_50}
+
+
+def test_profile_errors_carry_a_code_and_placeholders():
+    data = _valid()
+    data["thresholds"].pop("burn_3")
+    with pytest.raises(ProfileError) as err:
+        Profile.from_dict(data)
+    assert err.value.code == "profile_threshold_missing"
+    assert err.value.placeholders == {"state": "burn_3"}
+
+    data = _valid()
+    data["timings"]["burn_1"]["sequp"] = float("inf")
+    with pytest.raises(ProfileError) as err:
+        Profile.from_dict(data)
+    assert err.value.code == "profile_timing_not_finite"
+    assert err.value.placeholders == {"state": "burn_1", "key": "sequp"}
+
+    with pytest.raises(ProfileError) as err:
+        parse_profile_json("{ nope")
+    assert err.value.code == "profile_json_invalid"
+    assert err.value.placeholders["line"] == "1"
+    assert "column" in err.value.placeholders

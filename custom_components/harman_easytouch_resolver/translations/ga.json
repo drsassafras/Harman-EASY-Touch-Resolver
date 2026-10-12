@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Cuir sparán Harman EasyTouch leis",
-        "description": "Roghnaigh braiteoir cumhachta (vata) don sparán seo. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin. Roghnaigh próifíl atá ann cheana, nó roghnaigh \"Import / design a new profile\" chun leanúint ar aghaidh chuig eagarthóir na próifíle.",
+        "description": "Roghnaigh braiteoir cumhachta (vata) don sparán seo. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin. Roghnaigh próifíl atá ann cheana, nó roghnaigh \"Iompórtáil / dear próifíl nua\" chun leanúint ar aghaidh chuig eagarthóir na próifíle.",
         "data": {
           "name": "Ainm an sparáin",
           "source_entity": "Monatóireacht cumhachta don sparán peiléad (vata)",
@@ -12,7 +12,7 @@
         "data_description": {
           "name": "Ainm don sparán seo, mar shampla \"Sparán an tseomra suí\".",
           "source_entity": "Braiteoir a thuairiscíonn tarraingt cumhachta leictrí an sparáin i vataí, mar shampla ó phlocóid chliste nó ó mhonatóir fuinnimh. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin.",
-          "profile": "Na tairseacha agus na hamanna a úsáidtear chun staid an sparáin a oibriú amach. Roghnaigh próifíl, nó roghnaigh \"Import / design a new profile…\" chun eagarthóir JSON a oscailt."
+          "profile": "Na tairseacha agus na hamanna a úsáidtear chun staid an sparáin a oibriú amach. Roghnaigh próifíl, nó roghnaigh \"Iompórtáil / dear próifíl nua…\" chun eagarthóir JSON a oscailt."
         }
       },
       "import_profile": {
@@ -37,9 +37,24 @@
       }
     },
     "error": {
-      "invalid_profile": "Níl an phróifíl bailí: {error}",
       "reserved_name": "Is le próifíl ionsuite an t-ainm sin. Úsáid \"name\" eile.",
-      "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana."
+      "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana.",
+      "profile_json_invalid": "Níl an phróifíl ina JSON bailí (fadhb in aice le líne {line}, colún {column}).",
+      "profile_not_object": "Caithfidh an phróifíl a bheith ina réad JSON.",
+      "profile_name_invalid": "Caithfidh \"name\" a bheith ina théad neamhfholamh.",
+      "profile_thresholds_not_object": "Caithfidh \"thresholds\" a bheith ina réad.",
+      "profile_threshold_missing": "Tá an tairseach do \"{state}\" ar iarraidh.",
+      "profile_threshold_not_number": "Caithfidh an tairseach do \"{state}\" a bheith ina uimhir.",
+      "profile_threshold_not_finite": "Caithfidh an tairseach do \"{state}\" a bheith ina uimhir chríochta.",
+      "profile_threshold_unknown": "Staideanna tairsí anaithnide: {states}.",
+      "profile_thresholds_order": "Caithfidh na tairseacha laghdú go docht ó \"ignite\" go \"idle\".",
+      "profile_timings_not_object": "Caithfidh \"timings\" a bheith ina réad.",
+      "profile_timing_unknown_state": "Staid anaithnid in timings: \"{state}\".",
+      "profile_timing_state_not_object": "Caithfidh na hamanna do \"{state}\" a bheith ina réad.",
+      "profile_timing_unknown_key": "Am anaithnid \"{key}\" do \"{state}\".",
+      "profile_timing_not_number": "Caithfidh an t-am \"{key}\" do \"{state}\" a bheith ina uimhir.",
+      "profile_timing_not_finite": "Caithfidh an t-am \"{key}\" do \"{state}\" a bheith ina uimhir chríochta.",
+      "profile_timing_negative": "Caithfidh an t-am \"{key}\" do \"{state}\" a bheith 0 nó níos mó."
     },
     "abort": {
       "already_configured": "Tá sparán leis an ainm seo ann cheana.",
@@ -76,9 +91,31 @@
       }
     },
     "error": {
-      "invalid_profile": "Níl an phróifíl bailí: {error}",
       "reserved_name": "Is le próifíl ionsuite an t-ainm sin. Úsáid \"name\" eile.",
-      "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana."
+      "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana.",
+      "profile_json_invalid": "Níl an phróifíl ina JSON bailí (fadhb in aice le líne {line}, colún {column}).",
+      "profile_not_object": "Caithfidh an phróifíl a bheith ina réad JSON.",
+      "profile_name_invalid": "Caithfidh \"name\" a bheith ina théad neamhfholamh.",
+      "profile_thresholds_not_object": "Caithfidh \"thresholds\" a bheith ina réad.",
+      "profile_threshold_missing": "Tá an tairseach do \"{state}\" ar iarraidh.",
+      "profile_threshold_not_number": "Caithfidh an tairseach do \"{state}\" a bheith ina uimhir.",
+      "profile_threshold_not_finite": "Caithfidh an tairseach do \"{state}\" a bheith ina uimhir chríochta.",
+      "profile_threshold_unknown": "Staideanna tairsí anaithnide: {states}.",
+      "profile_thresholds_order": "Caithfidh na tairseacha laghdú go docht ó \"ignite\" go \"idle\".",
+      "profile_timings_not_object": "Caithfidh \"timings\" a bheith ina réad.",
+      "profile_timing_unknown_state": "Staid anaithnid in timings: \"{state}\".",
+      "profile_timing_state_not_object": "Caithfidh na hamanna do \"{state}\" a bheith ina réad.",
+      "profile_timing_unknown_key": "Am anaithnid \"{key}\" do \"{state}\".",
+      "profile_timing_not_number": "Caithfidh an t-am \"{key}\" do \"{state}\" a bheith ina uimhir.",
+      "profile_timing_not_finite": "Caithfidh an t-am \"{key}\" do \"{state}\" a bheith ina uimhir chríochta.",
+      "profile_timing_negative": "Caithfidh an t-am \"{key}\" do \"{state}\" a bheith 0 nó níos mó."
+    }
+  },
+  "selector": {
+    "profile": {
+      "options": {
+        "import_new": "Iompórtáil / dear próifíl nua…"
+      }
     }
   },
   "entity": {
@@ -99,10 +136,40 @@
           "burn_5": "Dó 5",
           "burn_6": "Dó 6",
           "ignite": "Adhaint"
+        },
+        "state_attributes": {
+          "raw_state": {
+            "name": "Staid amh",
+            "state": {
+              "sensor_fault": "Locht braiteora",
+              "idle": "Díomhaoin",
+              "extinguish": "Múchadh",
+              "post_ignite": "Iar-adhaint",
+              "fault_extinguish": "Múchadh locht",
+              "cool_down": "Fuarú",
+              "burn_1": "Dó 1",
+              "burn_2": "Dó 2",
+              "burn_3": "Dó 3",
+              "burn_4": "Dó 4",
+              "burn_5": "Dó 5",
+              "burn_6": "Dó 6",
+              "ignite": "Adhaint"
+            }
+          },
+          "moving_average": {
+            "name": "Meán gluaiseachta"
+          }
         }
       },
       "general_state": {
-        "name": "Staid ghinearálta"
+        "name": "Staid ghinearálta",
+        "state": {
+          "faulted": "Lochtach",
+          "lighting": "Ag adhaint",
+          "burning": "Ag dó",
+          "cooldown": "Fuarú",
+          "idle": "Díomhaoin"
+        }
       }
     },
     "binary_sensor": {

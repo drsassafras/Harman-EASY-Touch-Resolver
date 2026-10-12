@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Ychwanegu stôf Harman EasyTouch",
-        "description": "Dewiswch y synhwyrydd pŵer (watiau) ar gyfer y stôf hon. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad. Dewiswch broffil sy'n bodoli eisoes, neu dewiswch \"Import / design a new profile\" i fynd ymlaen i'r golygydd proffiliau.",
+        "description": "Dewiswch y synhwyrydd pŵer (watiau) ar gyfer y stôf hon. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad. Dewiswch broffil sy'n bodoli eisoes, neu dewiswch \"Mewnforio / dylunio proffil newydd\" i fynd ymlaen i'r golygydd proffiliau.",
         "data": {
           "name": "Enw'r stôf",
           "source_entity": "Monitro pŵer ar gyfer y stôf belenni (watiau)",
@@ -12,7 +12,7 @@
         "data_description": {
           "name": "Enw ar gyfer y stôf hon, er enghraifft \"Stôf yr ystafell fyw\".",
           "source_entity": "Synhwyrydd sy'n adrodd faint o bŵer trydanol y mae'r stôf yn ei dynnu mewn watiau, er enghraifft o blwg clyfar neu fonitor ynni. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad.",
-          "profile": "Y trothwyon a'r amseriadau a ddefnyddir i weithio allan cyflwr y stôf. Dewiswch broffil, neu dewiswch \"Import / design a new profile…\" i agor y golygydd JSON."
+          "profile": "Y trothwyon a'r amseriadau a ddefnyddir i weithio allan cyflwr y stôf. Dewiswch broffil, neu dewiswch \"Mewnforio / dylunio proffil newydd…\" i agor y golygydd JSON."
         }
       },
       "import_profile": {
@@ -37,9 +37,24 @@
       }
     },
     "error": {
-      "invalid_profile": "Nid yw'r proffil yn ddilys: {error}",
       "reserved_name": "Mae'r enw hwnnw'n perthyn i broffil adeiledig. Defnyddiwch \"name\" gwahanol.",
-      "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw."
+      "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw.",
+      "profile_json_invalid": "Nid yw'r proffil yn JSON dilys (problem ger llinell {line}, colofn {column}).",
+      "profile_not_object": "Rhaid i'r proffil fod yn wrthrych JSON.",
+      "profile_name_invalid": "Rhaid i \"name\" fod yn llinyn nad yw'n wag.",
+      "profile_thresholds_not_object": "Rhaid i \"thresholds\" fod yn wrthrych.",
+      "profile_threshold_missing": "Mae'r trothwy ar gyfer \"{state}\" ar goll.",
+      "profile_threshold_not_number": "Rhaid i'r trothwy ar gyfer \"{state}\" fod yn rif.",
+      "profile_threshold_not_finite": "Rhaid i'r trothwy ar gyfer \"{state}\" fod yn rif meidraidd.",
+      "profile_threshold_unknown": "Cyflyrau trothwy anhysbys: {states}.",
+      "profile_thresholds_order": "Rhaid i'r trothwyon leihau'n llym o \"ignite\" i lawr i \"idle\".",
+      "profile_timings_not_object": "Rhaid i \"timings\" fod yn wrthrych.",
+      "profile_timing_unknown_state": "Cyflwr anhysbys yn timings: \"{state}\".",
+      "profile_timing_state_not_object": "Rhaid i'r amseriadau ar gyfer \"{state}\" fod yn wrthrych.",
+      "profile_timing_unknown_key": "Amseriad anhysbys \"{key}\" ar gyfer \"{state}\".",
+      "profile_timing_not_number": "Rhaid i'r amseriad \"{key}\" ar gyfer \"{state}\" fod yn rif.",
+      "profile_timing_not_finite": "Rhaid i'r amseriad \"{key}\" ar gyfer \"{state}\" fod yn rif meidraidd.",
+      "profile_timing_negative": "Rhaid i'r amseriad \"{key}\" ar gyfer \"{state}\" fod yn 0 neu fwy."
     },
     "abort": {
       "already_configured": "Mae stôf gyda'r enw hwn eisoes yn bodoli.",
@@ -76,9 +91,31 @@
       }
     },
     "error": {
-      "invalid_profile": "Nid yw'r proffil yn ddilys: {error}",
       "reserved_name": "Mae'r enw hwnnw'n perthyn i broffil adeiledig. Defnyddiwch \"name\" gwahanol.",
-      "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw."
+      "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw.",
+      "profile_json_invalid": "Nid yw'r proffil yn JSON dilys (problem ger llinell {line}, colofn {column}).",
+      "profile_not_object": "Rhaid i'r proffil fod yn wrthrych JSON.",
+      "profile_name_invalid": "Rhaid i \"name\" fod yn llinyn nad yw'n wag.",
+      "profile_thresholds_not_object": "Rhaid i \"thresholds\" fod yn wrthrych.",
+      "profile_threshold_missing": "Mae'r trothwy ar gyfer \"{state}\" ar goll.",
+      "profile_threshold_not_number": "Rhaid i'r trothwy ar gyfer \"{state}\" fod yn rif.",
+      "profile_threshold_not_finite": "Rhaid i'r trothwy ar gyfer \"{state}\" fod yn rif meidraidd.",
+      "profile_threshold_unknown": "Cyflyrau trothwy anhysbys: {states}.",
+      "profile_thresholds_order": "Rhaid i'r trothwyon leihau'n llym o \"ignite\" i lawr i \"idle\".",
+      "profile_timings_not_object": "Rhaid i \"timings\" fod yn wrthrych.",
+      "profile_timing_unknown_state": "Cyflwr anhysbys yn timings: \"{state}\".",
+      "profile_timing_state_not_object": "Rhaid i'r amseriadau ar gyfer \"{state}\" fod yn wrthrych.",
+      "profile_timing_unknown_key": "Amseriad anhysbys \"{key}\" ar gyfer \"{state}\".",
+      "profile_timing_not_number": "Rhaid i'r amseriad \"{key}\" ar gyfer \"{state}\" fod yn rif.",
+      "profile_timing_not_finite": "Rhaid i'r amseriad \"{key}\" ar gyfer \"{state}\" fod yn rif meidraidd.",
+      "profile_timing_negative": "Rhaid i'r amseriad \"{key}\" ar gyfer \"{state}\" fod yn 0 neu fwy."
+    }
+  },
+  "selector": {
+    "profile": {
+      "options": {
+        "import_new": "Mewnforio / dylunio proffil newydd…"
+      }
     }
   },
   "entity": {
@@ -99,10 +136,40 @@
           "burn_5": "Llosgi 5",
           "burn_6": "Llosgi 6",
           "ignite": "Tanio"
+        },
+        "state_attributes": {
+          "raw_state": {
+            "name": "Cyflwr crai",
+            "state": {
+              "sensor_fault": "Nam synhwyrydd",
+              "idle": "Segur",
+              "extinguish": "Diffodd",
+              "post_ignite": "Ôl-danio",
+              "fault_extinguish": "Diffodd nam",
+              "cool_down": "Oeri",
+              "burn_1": "Llosgi 1",
+              "burn_2": "Llosgi 2",
+              "burn_3": "Llosgi 3",
+              "burn_4": "Llosgi 4",
+              "burn_5": "Llosgi 5",
+              "burn_6": "Llosgi 6",
+              "ignite": "Tanio"
+            }
+          },
+          "moving_average": {
+            "name": "Cyfartaledd symudol"
+          }
         }
       },
       "general_state": {
-        "name": "Cyflwr cyffredinol"
+        "name": "Cyflwr cyffredinol",
+        "state": {
+          "faulted": "Nam",
+          "lighting": "Tanio",
+          "burning": "Llosgi",
+          "cooldown": "Oeri",
+          "idle": "Segur"
+        }
       }
     },
     "binary_sensor": {

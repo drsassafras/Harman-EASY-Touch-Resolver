@@ -115,3 +115,63 @@ def test_repair_and_reconfigure_texts_exist():
         "config.abort.reconfigure_successful",
     ):
         assert key in EN
+
+
+def test_every_general_state_has_a_translation_and_an_icon():
+    from custom_components.harman_easytouch_resolver.const import (
+        ACTIVE_GENERAL_STATES,
+        GENERAL_STATE_MAP,
+        GENERAL_STATE_OPTIONS,
+    )
+
+    assert set(GENERAL_STATE_MAP.values()) == set(GENERAL_STATE_OPTIONS)
+    assert ACTIVE_GENERAL_STATES <= set(GENERAL_STATE_OPTIONS)
+    for path in TRANSLATIONS:
+        keys = _load(path)
+        prefix = "entity.sensor.general_state.state."
+        found = {k[len(prefix):] for k in keys if k.startswith(prefix)}
+        assert found == set(GENERAL_STATE_OPTIONS), path.stem
+    icons = json.loads((COMPONENT / "icons.json").read_text())
+    assert set(icons["entity"]["sensor"]["general_state"]["state"]) == set(GENERAL_STATE_OPTIONS)
+
+
+def test_every_profile_error_has_a_translated_message():
+    from custom_components.harman_easytouch_resolver.profile import (
+        _MESSAGES,
+        PROFILE_ERROR_CODES,
+    )
+
+    for path in TRANSLATIONS:
+        keys = _load(path)
+        for section in ("config", "options"):
+            for code in PROFILE_ERROR_CODES:
+                text = keys[f"{section}.error.{code}"]
+                # Only placeholders the code can supply (the JSON error adds a column).
+                allowed = set(PLACEHOLDER.findall(_MESSAGES[code])) | {"column"}
+                assert set(PLACEHOLDER.findall(text)) <= allowed, (path.stem, code)
+            assert f"{section}.error.invalid_profile" not in keys
+
+
+def test_the_import_option_and_state_attributes_are_translated():
+    from custom_components.harman_easytouch_resolver.const import IMPORT_NEW, ORDER
+
+    for path in TRANSLATIONS:
+        keys = _load(path)
+        assert keys[f"selector.profile.options.{IMPORT_NEW}"].strip(), path.stem
+        assert keys["entity.sensor.state.state_attributes.moving_average.name"].strip()
+        prefix = "entity.sensor.state.state_attributes.raw_state.state."
+        assert {k[len(prefix):] for k in keys if k.startswith(prefix)} == set(ORDER), path.stem
+        assert keys["entity.sensor.state.state_attributes.raw_state.name"].strip()
+
+
+def test_translated_text_does_not_quote_the_english_import_label():
+    for path in TRANSLATIONS:
+        if path.stem != "en":
+            assert "Import / design a new profile" not in path.read_text(encoding="utf-8")
+
+
+def test_translation_keys_are_valid():
+    key_pattern = re.compile(r"^(?!.+__)(?!_)[\da-z_]+(?<!_)$")
+    from custom_components.harman_easytouch_resolver.const import IMPORT_NEW
+
+    assert key_pattern.match(IMPORT_NEW)

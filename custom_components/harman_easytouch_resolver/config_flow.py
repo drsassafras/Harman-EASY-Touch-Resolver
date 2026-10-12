@@ -74,17 +74,23 @@ def _profile_selector(names: list[str], allow_import: bool = False) -> SelectSel
         options.append(
             SelectOptionDict(value=IMPORT_NEW, label="Import / design a new profile…")
         )
+    # translation_key translates the "import" entry; saved profile names have no
+    # translation and are shown as they are.
     return SelectSelector(
-        SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN)
+        SelectSelectorConfig(
+            options=options,
+            mode=SelectSelectorMode.DROPDOWN,
+            translation_key="profile",
+        )
     )
 
 
-def _check_profile_text(text: str) -> tuple[Profile | None, str | None]:
-    """Return (profile, None) or (None, error message)."""
+def _check_profile_text(text: str) -> tuple[Profile | None, ProfileError | None]:
+    """Return (profile, None) or (None, error). (None, None) means a reserved name."""
     try:
         profile = parse_profile_json(text)
     except ProfileError as err:
-        return None, str(err)
+        return None, err
     if profile.name in BUILTIN_PROFILES or profile.name == IMPORT_NEW:
         return None, None  # reserved name: caller shows the 'reserved_name' error
     return profile, None
@@ -146,14 +152,14 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
-        placeholders = {"error": ""}
+        placeholders: dict[str, str] = {}
         schema = vol.Schema({vol.Required(CONF_PROFILE_JSON): _JSON_SELECTOR})
 
         if user_input is not None:
-            profile, message = _check_profile_text(user_input[CONF_PROFILE_JSON])
-            if message:
-                errors["base"] = "invalid_profile"
-                placeholders["error"] = message
+            profile, error = _check_profile_text(user_input[CONF_PROFILE_JSON])
+            if error is not None:
+                errors["base"] = error.code
+                placeholders = dict(error.placeholders)
             elif profile is None:
                 errors["base"] = "reserved_name"
             else:
@@ -270,14 +276,14 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
-        placeholders = {"error": ""}
+        placeholders: dict[str, str] = {}
         schema = vol.Schema({vol.Required(CONF_PROFILE_JSON): _JSON_SELECTOR})
 
         if user_input is not None:
-            profile, message = _check_profile_text(user_input[CONF_PROFILE_JSON])
-            if message:
-                errors["base"] = "invalid_profile"
-                placeholders["error"] = message
+            profile, error = _check_profile_text(user_input[CONF_PROFILE_JSON])
+            if error is not None:
+                errors["base"] = error.code
+                placeholders = dict(error.placeholders)
             elif profile is None:
                 errors["base"] = "reserved_name"
             else:

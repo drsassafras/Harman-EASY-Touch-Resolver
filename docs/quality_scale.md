@@ -64,9 +64,9 @@ How to read the status column:
 | entity-category | Exempt | No diagnostic or configuration entities. |
 | entity-device-class | Done | ENUM sensors and a RUNNING binary sensor. |
 | entity-disabled-by-default | Exempt | Three entities, none noisy. |
-| entity-translations | Partly done | Names and all 13 states of the State sensor are translated (English, Canadian French, Irish, Welsh). The General state values stay in English because their capitalised values can't be translation keys. Irish and Welsh are not native-reviewed. |
-| exception-translations | Exempt | The integration raises no exceptions to the user. |
-| icon-translations | Partly done | `icons.json` covers the State sensor and the binary sensor. The General state icons come from code for the same capitalisation reason. |
+| entity-translations | Done | Names, every state of both sensors and the State sensor's attributes are translated (English, Canadian French, Irish, Welsh). Irish and Welsh are not native-reviewed. |
+| exception-translations | Exempt | The integration raises no exceptions to the user. Profile validation problems are shown as translated form errors. |
+| icon-translations | Done | `icons.json` covers every state of both sensors and the binary sensor. |
 | reconfiguration-flow | Done | Reconfigure changes the power sensor; tested. |
 | repair-issues | Done | A missing profile raises a repair item that clears itself; tested. |
 | stale-devices | Exempt | One device per config entry; it is removed with the entry. |
@@ -80,7 +80,3 @@ How to read the status column:
 | strict-typing | Done | `[tool.mypy] strict = true`; `mypy` reports no issues, and the `mypy` CI job keeps it that way. |
 
 The code is fully asynchronous and event driven.
-
-## What would make General state fully translatable
-
-Its values (`Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle`) were kept from the original automation. Changing them to lowercase keys (`faulted`, ...) would let both the translations and `icons.json` cover them, but it would change the sensor's state and break automations that compare against the old values, so it needs a deliberate breaking-change release.
