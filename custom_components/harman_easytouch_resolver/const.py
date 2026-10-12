@@ -22,7 +22,7 @@ DEFAULT_UNAVAILABLE_DELAY = 60
 MAX_UNAVAILABLE_DELAY = 600
 
 # Timing used for a state a profile does not configure (matches the old automation).
-DEFAULT_TIMING = {"sequp": 3, "seqdown": 3, "nonseq": 3}
+DEFAULT_TIMING: dict[str, float] = {"sequp": 3, "seqdown": 3, "nonseq": 3}
 TIMING_KEYS = ("sequp", "seqdown", "cascadeup", "cascadedown", "nonseq")
 
 # Fixed state order. Sequential up/down is decided by position in this list.

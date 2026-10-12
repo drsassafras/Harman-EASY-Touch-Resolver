@@ -480,3 +480,43 @@ async def test_builtin_profiles_win_over_saved_ones_with_the_same_name(
     store = await async_get_profile_store(hass)
     assert store.get("Allure 50") is ALLURE_50
     assert store.names == ["Allure 50"]  # listed once
+
+
+# -- reconfigure ----------------------------------------------------------------------------
+
+
+async def _reconfigure(hass: HomeAssistant, entry):
+    return await hass.config_entries.flow.async_init(
+        DOMAIN,
+        context={"source": config_entries.SOURCE_RECONFIGURE, "entry_id": entry.entry_id},
+    )
+
+
+async def test_reconfigure_changes_the_power_sensor(hass: HomeAssistant) -> None:
+    entry = _entry()
+    entry.add_to_hass(hass)
+    result = await _reconfigure(hass, entry)
+    assert result["type"] is FlowResultType.FORM
+    assert result["step_id"] == "reconfigure"
+    assert _field_names(result) == [CONF_SOURCE]
+    assert _suggested(result, CONF_SOURCE) == SOURCE
+
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_SOURCE: OTHER_SOURCE}
+    )
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.options == {CONF_SOURCE: OTHER_SOURCE, CONF_PROFILE: "Allure 50"}
+
+
+async def test_reconfigure_cannot_use_another_stoves_sensor(hass: HomeAssistant) -> None:
+    entry = _entry()
+    entry.add_to_hass(hass)
+    _entry("Second stove", OTHER_SOURCE).add_to_hass(hass)
+    result = await _reconfigure(hass, entry)
+    result = await hass.config_entries.flow.async_configure(
+        result["flow_id"], {CONF_SOURCE: OTHER_SOURCE}
+    )
+    assert result["type"] is FlowResultType.FORM
+    assert result["errors"] == {"base": "source_in_use"}
+    assert entry.options[CONF_SOURCE] == SOURCE

@@ -24,6 +24,16 @@
         "data_description": {
           "profile_json": "Le profil au format JSON. Consultez la description ci-dessus pour le format."
         }
+      },
+      "reconfigure": {
+        "title": "Changer le capteur de puissance",
+        "description": "Choisissez le capteur de puissance (watts) que ce poêle doit utiliser. Le poêle se recharge lorsque vous soumettez.",
+        "data": {
+          "source_entity": "Surveillance de la puissance du poêle à granules (watts)"
+        },
+        "data_description": {
+          "source_entity": "Un capteur qui indique la puissance électrique consommée par le poêle en watts, par exemple une prise intelligente ou un moniteur d'énergie. Il sert uniquement à calculer la moyenne mobile sur 20 secondes."
+        }
       }
     },
     "error": {
@@ -32,7 +42,8 @@
       "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle."
     },
     "abort": {
-      "already_configured": "Un poêle portant ce nom existe déjà."
+      "already_configured": "Un poêle portant ce nom existe déjà.",
+      "reconfigure_successful": "Le capteur de puissance a été mis à jour."
     }
   },
   "options": {
@@ -68,6 +79,42 @@
       "invalid_profile": "Le profil n'est pas valide : {error}",
       "reserved_name": "Ce nom appartient à un profil intégré. Utilisez un « name » différent.",
       "source_in_use": "Ce capteur de puissance est déjà utilisé par un autre poêle."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "state": {
+        "name": "État",
+        "state": {
+          "sensor_fault": "Défaut du capteur",
+          "idle": "Au repos",
+          "extinguish": "Extinction",
+          "post_ignite": "Post-allumage",
+          "fault_extinguish": "Extinction sur défaut",
+          "cool_down": "Refroidissement",
+          "burn_1": "Combustion 1",
+          "burn_2": "Combustion 2",
+          "burn_3": "Combustion 3",
+          "burn_4": "Combustion 4",
+          "burn_5": "Combustion 5",
+          "burn_6": "Combustion 6",
+          "ignite": "Allumage"
+        }
+      },
+      "general_state": {
+        "name": "État général"
+      }
+    },
+    "binary_sensor": {
+      "active": {
+        "name": "Actif"
+      }
+    }
+  },
+  "issues": {
+    "profile_missing": {
+      "title": "Profil du poêle introuvable",
+      "description": "Le poêle « {stove} » est configuré avec le profil « {profile} », qui n'existe plus; le profil intégré « {fallback} » est donc utilisé à la place. Ouvrez les options de l'intégration, puis sélectionnez ou importez un profil."
     }
   }
 }

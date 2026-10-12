@@ -24,6 +24,16 @@
         "data_description": {
           "profile_json": "Y proffil ar ffurf JSON. Gweler y disgrifiad uchod am y fformat."
         }
+      },
+      "reconfigure": {
+        "title": "Newid y synhwyrydd pŵer",
+        "description": "Dewiswch y synhwyrydd pŵer (watiau) y dylai'r stôf hon ei ddefnyddio. Mae'r stôf yn aillwytho pan fyddwch yn cyflwyno.",
+        "data": {
+          "source_entity": "Monitro pŵer ar gyfer y stôf belenni (watiau)"
+        },
+        "data_description": {
+          "source_entity": "Synhwyrydd sy'n adrodd faint o bŵer trydanol y mae'r stôf yn ei dynnu mewn watiau, er enghraifft o blwg clyfar neu fonitor ynni. Fe'i defnyddir yn unig i greu'r cyfartaledd symudol 20 eiliad."
+        }
       }
     },
     "error": {
@@ -32,7 +42,8 @@
       "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw."
     },
     "abort": {
-      "already_configured": "Mae stôf gyda'r enw hwn eisoes yn bodoli."
+      "already_configured": "Mae stôf gyda'r enw hwn eisoes yn bodoli.",
+      "reconfigure_successful": "Diweddarwyd y synhwyrydd pŵer."
     }
   },
   "options": {
@@ -68,6 +79,42 @@
       "invalid_profile": "Nid yw'r proffil yn ddilys: {error}",
       "reserved_name": "Mae'r enw hwnnw'n perthyn i broffil adeiledig. Defnyddiwch \"name\" gwahanol.",
       "source_in_use": "Mae stôf arall eisoes yn defnyddio'r synhwyrydd pŵer hwnnw."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "state": {
+        "name": "Cyflwr",
+        "state": {
+          "sensor_fault": "Nam synhwyrydd",
+          "idle": "Segur",
+          "extinguish": "Diffodd",
+          "post_ignite": "Ôl-danio",
+          "fault_extinguish": "Diffodd nam",
+          "cool_down": "Oeri",
+          "burn_1": "Llosgi 1",
+          "burn_2": "Llosgi 2",
+          "burn_3": "Llosgi 3",
+          "burn_4": "Llosgi 4",
+          "burn_5": "Llosgi 5",
+          "burn_6": "Llosgi 6",
+          "ignite": "Tanio"
+        }
+      },
+      "general_state": {
+        "name": "Cyflwr cyffredinol"
+      }
+    },
+    "binary_sensor": {
+      "active": {
+        "name": "Gweithredol"
+      }
+    }
+  },
+  "issues": {
+    "profile_missing": {
+      "title": "Heb ddod o hyd i broffil y stôf",
+      "description": "Mae'r stôf \"{stove}\" wedi'i gosod i ddefnyddio'r proffil \"{profile}\", nad yw'n bodoli mwyach, felly defnyddir y proffil adeiledig \"{fallback}\" yn ei le. Agorwch opsiynau'r integreiddiad a dewiswch neu mewnforiwch broffil."
     }
   }
 }

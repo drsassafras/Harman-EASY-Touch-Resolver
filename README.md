@@ -1,7 +1,7 @@
 # Harman EasyTouch Resolver
 
-[![Validate](hhttps://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/validate.yaml/badge.svg)](https://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/validate.yaml)
-[![Tests](hhttps://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/tests.yaml/badge.svg)](https://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/tests.yaml)
+[![Validate](https://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/validate.yaml/badge.svg)](https://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/validate.yaml)
+[![Tests](https://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/tests.yaml/badge.svg)](https://github.com/drsassafras/Harman-EASY-Touch-Resolver/actions/workflows/tests.yaml)
 
 A Home Assistant integration that works out what a Harman pellet stove is doing by watching how much power it draws.
 
@@ -27,6 +27,13 @@ Each stove you add creates one device with:
 | **General state** (sensor) | A simplified view: `Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle`. |
 | **Active** (binary sensor) | On while the general state is `Lighting` or `Burning`. |
 
+## Use cases
+
+- Show on a dashboard whether the stove is lighting, burning, cooling down or idle, without any wiring to the stove.
+- Get a notification when the stove faults, or has been burning for many hours.
+- Turn on a fan or adjust the heating when the stove starts burning, and back again when it goes idle.
+- Keep a history of when the stove ran and at which heat level.
+
 ## Installation
 
 ### Prerequisites
@@ -36,7 +43,7 @@ Each stove you add creates one device with:
 ### With HACS (recommended)
 
 1. In HACS, open the three-dot menu and choose **Custom repositories**.
-2. Add `https://github.com/YOUR_GITHUB_USER/harman_easytouch_resolver` with the category **Integration**.
+2. Add `https://github.com/drsassafras/Harman-EASY-Touch-Resolver` with the category **Integration**.
 3. Find **Harman EasyTouch Resolver** in HACS, download it, and restart Home Assistant.
 
 ### Manually
@@ -56,7 +63,16 @@ Go to **Settings → Devices & services → Add integration**, search for **Harm
 
 ## Changing settings
 
-Select **Configure** on the integration. The first page has the same sensor and profile fields. To edit a profile's JSON at any time, tick **Edit profile JSON** and select **Submit**. The editor opens pre-filled with the selected profile.
+Select **Configure** on the integration. The first page has these fields:
+
+| Field | Description |
+|---|---|
+| **Power monitoring for pellet stove (watts)** | The power sensor. A sensor can only be used by one stove. |
+| **Stove profile** | The profile used to work out the state. |
+| **Keep last state when the sensor drops out (seconds)** | How long the entities keep showing the last state after the power sensor becomes unavailable, including while it starts up after a Home Assistant restart. 60 by default, 0 to 600. 0 shows the stove as unavailable immediately. |
+| **Edit profile JSON** | Tick and select **Submit** to open the JSON editor, pre-filled with the selected profile. |
+
+To point a stove at a different power sensor you can also use **Reconfigure** from the integration's three-dot menu. It only asks for the sensor.
 
 Built-in profiles can't be overwritten, so editing one saves a copy under the new `name` you give it. Editing one of your own profiles under the same name updates it, and every stove using it reloads.
 
@@ -71,6 +87,36 @@ This integration does not provide any actions.
 3. If you installed with HACS, remove it there too, or delete `custom_components/harman_easytouch_resolver` and restart.
 
 Saved custom profiles are kept in `.storage/harman_easytouch_resolver.profiles`. Delete that file after removing the last stove if you no longer want them.
+
+## Automation examples
+
+Notify when the stove faults:
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: sensor.living_room_stove_general_state
+    to: "Faulted"
+actions:
+  - action: notify.notify
+    data:
+      message: "The pellet stove has a fault."
+```
+
+Run a fan while the stove is active:
+
+```yaml
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.living_room_stove_active
+    to: "on"
+actions:
+  - action: switch.turn_on
+    target:
+      entity_id: switch.living_room_fan
+```
+
+Entity ids follow your stove name, so replace `living_room_stove` with yours.
 
 ## Finding the right power levels for your stove
 
@@ -131,7 +177,22 @@ A state that has no entry in `timings` at all waits 3 seconds for every kind of 
 - When the power sensor becomes unavailable or not a number, all three entities keep showing the last state for the **Keep last state when the sensor drops out** time (60 seconds by default, 0 to 600 in the options). Only if the sensor is still bad after that do they show as unavailable. Set it to 0 for the old behaviour. A short outage therefore leaves no gap in the history.
 - The same time covers a Home Assistant restart: the last state is restored and shown while the power sensor comes online. If your power sensor takes longer than that to start (for example a Zigbee or MQTT device), raise the value. Time while Home Assistant itself is not running cannot be recorded.
 - If readings were missing for more than 20 seconds, the integration waits for a fresh 20 second window before changing the state.
-- Updates are event driven: the integration reacts to the power sensor's state changes and never polls.
+- Updates are event driven: the integration reacts to the power sensor's state changes and never polls. Readings that repeat the same value count as samples too.
+- If the power sensor stays unavailable longer than the keep-last-state time, one warning is logged and one message when it reports again. Nothing is logged while it is flapping inside the time.
+
+## Known limitations
+
+- It works out the state from power draw only, so it cannot tell a fault apart from a different stove component drawing unusual power.
+- A stove needs its own power sensor, and one sensor cannot serve two stoves.
+- The 20 second averaging window is fixed because of the stove's 10 second power cycle.
+- A state is only known after the first full 20 seconds of readings.
+- The history has a gap while Home Assistant itself is not running. The keep-last-state time only covers the power sensor coming back late.
+- The **General state** values (`Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle`) are shown in English in every language, because Home Assistant cannot translate state values that start with a capital letter. The **State** sensor and all entity names are translated.
+
+## Diagnostics and repairs
+
+- **Diagnostics:** on the integration page, open the three-dot menu of a stove and choose **Download diagnostics**. It includes the options, the profile and the current averaging state. Attach it when reporting an issue.
+- **Repairs:** if a stove refers to a profile that no longer exists, a repair item appears under **Settings → System → Repairs** and the built-in `Allure 50` profile is used meanwhile. Choose or import a profile in the integration's options to clear it.
 
 ## Troubleshooting
 
@@ -141,11 +202,11 @@ A state that has no entry in `timings` at all waits 3 seconds for every kind of 
 | State is `unknown` | Waiting for the first 20 seconds of readings. |
 | State flaps between two levels | Thresholds sit too close to the stove's real power at that level. Check `moving_average` and move the threshold. Increase the timings for that state. |
 | State is stuck on `sensor_fault` | `moving_average` is at or below the profile's `idle` value. Check the sensor's units are watts. |
-| "Profile not found" in the log | A stove refers to a profile that no longer exists. It falls back to `Allure 50`. |
+| "Profile not found" in the log, or a repair item | A stove refers to a profile that no longer exists. It falls back to `Allure 50` until you choose another in the options. |
 
 ## Translations
 
-English, Canadian English, Canadian French, Irish and Welsh. The Irish and Welsh have not been reviewed by native speakers; corrections are welcome.
+English, Canadian French, Irish and Welsh. The Irish and Welsh have not been reviewed by native speakers; corrections are welcome.
 
 ## Development
 

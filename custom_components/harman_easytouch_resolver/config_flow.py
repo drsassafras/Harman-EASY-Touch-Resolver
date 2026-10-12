@@ -7,7 +7,12 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult, OptionsFlow
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
 from homeassistant.const import CONF_NAME
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.selector import (
@@ -165,6 +170,31 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
             description_placeholders=placeholders,
         )
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Point an existing stove at a different power sensor."""
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            if _source_in_use(self.hass, user_input[CONF_SOURCE], entry.entry_id):
+                errors["base"] = "source_in_use"
+            else:
+                # The entry's update listener reloads the stove when the options change.
+                self.hass.config_entries.async_update_entry(
+                    entry, options={**entry.options, CONF_SOURCE: user_input[CONF_SOURCE]}
+                )
+                return self.async_abort(reason="reconfigure_successful")
+
+        schema = vol.Schema({vol.Required(CONF_SOURCE): _SOURCE_SELECTOR})
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(
+                schema, user_input or {CONF_SOURCE: entry.options.get(CONF_SOURCE)}
+            ),
+            errors=errors,
+        )
+
     def _create(self, profile_name: str) -> ConfigFlowResult:
         return self.async_create_entry(
             title=self._name,
@@ -174,7 +204,7 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry) -> OptionsFlow:
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
         return HarmanEasyTouchOptionsFlow()
 
 

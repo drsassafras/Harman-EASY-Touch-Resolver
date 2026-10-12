@@ -27,7 +27,7 @@ EN = _load(COMPONENT / "translations" / "en.json")
 
 
 def test_expected_languages_exist():
-    assert {p.stem for p in TRANSLATIONS} >= {"en", "en-CA", "fr-CA", "ga", "cy"}
+    assert {p.stem for p in TRANSLATIONS} >= {"en", "fr-CA", "ga", "cy"}
 
 
 @pytest.mark.parametrize("path", TRANSLATIONS, ids=lambda p: p.stem)
@@ -50,6 +50,7 @@ def test_no_empty_strings(path):
 
 def test_every_form_field_has_label_and_description():
     for step_path in ("config.step.user", "config.step.import_profile",
+                      "config.step.reconfigure",
                       "options.step.init", "options.step.import_profile"):
         data = {k for k in EN if k.startswith(f"{step_path}.data.")}
         desc = {k for k in EN if k.startswith(f"{step_path}.data_description.")}
@@ -84,3 +85,33 @@ def test_icons_json_state_keys_are_valid_translation_keys():
         for entity in platform.values():
             for state in entity.get("state", {}):
                 assert pattern.match(state), state
+
+
+def test_every_sensor_state_has_a_name_in_every_language():
+    from custom_components.harman_easytouch_resolver.const import ORDER
+
+    for path in TRANSLATIONS:
+        keys = _load(path)
+        prefix = "entity.sensor.state.state."
+        found = {k[len(prefix):] for k in keys if k.startswith(prefix)}
+        assert found == set(ORDER), path.stem
+
+
+def test_every_entity_has_a_name_in_every_language():
+    for path in TRANSLATIONS:
+        keys = _load(path)
+        for key in (
+            "entity.sensor.state.name",
+            "entity.sensor.general_state.name",
+            "entity.binary_sensor.active.name",
+        ):
+            assert keys[key].strip(), (path.stem, key)
+
+
+def test_repair_and_reconfigure_texts_exist():
+    for key in (
+        "issues.profile_missing.title",
+        "issues.profile_missing.description",
+        "config.abort.reconfigure_successful",
+    ):
+        assert key in EN

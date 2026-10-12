@@ -13,6 +13,9 @@ from .const import ACTIVE_GENERAL_STATES
 from .entity import StoveEntity
 from .runtime import StoveConfigEntry, StoveRuntime
 
+# All state comes from one in-memory runtime; nothing is fetched, so no limit is needed.
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: StoveConfigEntry, async_add_entities: AddEntitiesCallback
@@ -23,7 +26,6 @@ async def async_setup_entry(
 class StoveActiveBinarySensor(StoveEntity, BinarySensorEntity):
     """On while the general state is Lighting or Burning."""
 
-    _attr_name = "Active"
     _attr_translation_key = "active"
     _attr_device_class = BinarySensorDeviceClass.RUNNING
 

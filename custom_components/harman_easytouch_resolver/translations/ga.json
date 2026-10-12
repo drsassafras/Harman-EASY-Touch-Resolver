@@ -24,6 +24,16 @@
         "data_description": {
           "profile_json": "An phróifíl i bhformáid JSON. Féach an cur síos thuas don fhormáid."
         }
+      },
+      "reconfigure": {
+        "title": "Athraigh an braiteoir cumhachta",
+        "description": "Roghnaigh an braiteoir cumhachta (vataí) a úsáidfidh an sparán seo. Athlódálfar an sparán nuair a sheolann tú.",
+        "data": {
+          "source_entity": "Monatóireacht cumhachta don sparán peiléad (vata)"
+        },
+        "data_description": {
+          "source_entity": "Braiteoir a thuairiscíonn tarraingt cumhachta leictrí an sparáin i vataí, mar shampla ó phlocóid chliste nó ó mhonatóir fuinnimh. Úsáidtear é chun an meán gluaiseachta 20 soicind a thógáil amháin."
+        }
       }
     },
     "error": {
@@ -32,7 +42,8 @@
       "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana."
     },
     "abort": {
-      "already_configured": "Tá sparán leis an ainm seo ann cheana."
+      "already_configured": "Tá sparán leis an ainm seo ann cheana.",
+      "reconfigure_successful": "Nuashonraíodh an braiteoir cumhachta."
     }
   },
   "options": {
@@ -68,6 +79,42 @@
       "invalid_profile": "Níl an phróifíl bailí: {error}",
       "reserved_name": "Is le próifíl ionsuite an t-ainm sin. Úsáid \"name\" eile.",
       "source_in_use": "Úsáideann sparán eile an braiteoir cumhachta sin cheana."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "state": {
+        "name": "Staid",
+        "state": {
+          "sensor_fault": "Locht braiteora",
+          "idle": "Díomhaoin",
+          "extinguish": "Múchadh",
+          "post_ignite": "Iar-adhaint",
+          "fault_extinguish": "Múchadh locht",
+          "cool_down": "Fuarú",
+          "burn_1": "Dó 1",
+          "burn_2": "Dó 2",
+          "burn_3": "Dó 3",
+          "burn_4": "Dó 4",
+          "burn_5": "Dó 5",
+          "burn_6": "Dó 6",
+          "ignite": "Adhaint"
+        }
+      },
+      "general_state": {
+        "name": "Staid ghinearálta"
+      }
+    },
+    "binary_sensor": {
+      "active": {
+        "name": "Gníomhach"
+      }
+    }
+  },
+  "issues": {
+    "profile_missing": {
+      "title": "Níor aimsíodh próifíl an sparáin",
+      "description": "Tá an sparán \"{stove}\" socraithe chun an phróifíl \"{profile}\" a úsáid, ach níl sí ann a thuilleadh, mar sin úsáidtear an phróifíl ionsuite \"{fallback}\" ina háit. Oscail roghanna an chomhtháthaithe agus roghnaigh nó iompórtáil próifíl."
     }
   }
 }

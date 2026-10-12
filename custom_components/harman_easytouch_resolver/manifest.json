@@ -1,7 +1,7 @@
 {
   "domain": "harman_easytouch_resolver",
   "name": "Harman EASY Touch Resolver",
-  "codeowners": [],
+  "codeowners": ["@drsassafras"],
   "config_flow": true,
   "documentation": "https://github.com/drsassafras/Harman-EASY-Touch-Resolver",
   "integration_type": "device",

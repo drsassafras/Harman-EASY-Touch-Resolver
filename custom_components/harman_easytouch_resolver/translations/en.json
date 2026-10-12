@@ -24,6 +24,16 @@
         "data_description": {
           "profile_json": "The profile as JSON. See the description above for the format."
         }
+      },
+      "reconfigure": {
+        "title": "Change the power sensor",
+        "description": "Choose the power sensor (watts) this stove should use. The stove reloads when you submit.",
+        "data": {
+          "source_entity": "Power monitoring for pellet stove (watts)"
+        },
+        "data_description": {
+          "source_entity": "A sensor that reports the stove's electrical power draw in watts, for example from a smart plug or energy monitor. It is only used to build the 20 second moving average."
+        }
       }
     },
     "error": {
@@ -32,7 +42,8 @@
       "source_in_use": "That power sensor is already used by another stove."
     },
     "abort": {
-      "already_configured": "A stove with this name already exists."
+      "already_configured": "A stove with this name already exists.",
+      "reconfigure_successful": "The power sensor was updated."
     }
   },
   "options": {
@@ -68,6 +79,42 @@
       "invalid_profile": "The profile is not valid: {error}",
       "reserved_name": "That name belongs to a built-in profile. Use a different \"name\".",
       "source_in_use": "That power sensor is already used by another stove."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "state": {
+        "name": "State",
+        "state": {
+          "sensor_fault": "Sensor fault",
+          "idle": "Idle",
+          "extinguish": "Extinguish",
+          "post_ignite": "Post ignite",
+          "fault_extinguish": "Fault extinguish",
+          "cool_down": "Cool down",
+          "burn_1": "Burn 1",
+          "burn_2": "Burn 2",
+          "burn_3": "Burn 3",
+          "burn_4": "Burn 4",
+          "burn_5": "Burn 5",
+          "burn_6": "Burn 6",
+          "ignite": "Ignite"
+        }
+      },
+      "general_state": {
+        "name": "General state"
+      }
+    },
+    "binary_sensor": {
+      "active": {
+        "name": "Active"
+      }
+    }
+  },
+  "issues": {
+    "profile_missing": {
+      "title": "Stove profile not found",
+      "description": "The stove \"{stove}\" is set to use the profile \"{profile}\", which no longer exists, so the built-in \"{fallback}\" profile is being used instead. Open the integration's options and select or import a profile."
     }
   }
 }

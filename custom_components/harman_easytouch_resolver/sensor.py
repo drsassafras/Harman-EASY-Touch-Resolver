@@ -13,6 +13,9 @@ from .const import GENERAL_STATE_OPTIONS, ORDER
 from .entity import StoveEntity
 from .runtime import StoveConfigEntry, StoveRuntime
 
+# All state comes from one in-memory runtime; nothing is fetched, so no limit is needed.
+PARALLEL_UPDATES = 0
+
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: StoveConfigEntry, async_add_entities: AddEntitiesCallback
@@ -35,7 +38,6 @@ GENERAL_STATE_ICONS = {
 class StoveStateSensor(StoveEntity, SensorEntity):
     """The resolved state. Values match the old input_select options."""
 
-    _attr_name = "State"
     _attr_translation_key = "state"
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_options = ORDER
@@ -60,7 +62,6 @@ class StoveStateSensor(StoveEntity, SensorEntity):
 class StoveGeneralStateSensor(StoveEntity, SensorEntity):
     """Faulted / Lighting / Burning / Cooldown / Idle."""
 
-    _attr_name = "General state"
     _attr_translation_key = "general_state"
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_options = GENERAL_STATE_OPTIONS

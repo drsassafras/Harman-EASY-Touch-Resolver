@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+import logging
 
 import pytest
 
@@ -11,6 +12,7 @@ from homeassistant.const import CONF_NAME, STATE_OFF, STATE_ON, STATE_UNAVAILABL
 from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers import issue_registry as ir
 from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import (
     MockConfigEntry,
@@ -26,6 +28,9 @@ from custom_components.harman_easytouch_resolver.const import (
     DOMAIN,
     GENERAL_STATE_OPTIONS,
     ORDER,
+)
+from custom_components.harman_easytouch_resolver.diagnostics import (
+    async_get_config_entry_diagnostics,
 )
 from custom_components.harman_easytouch_resolver.profile import ALLURE_50
 
@@ -430,3 +435,106 @@ async def test_changing_options_reloads_with_the_new_sensor(hass: HomeAssistant,
     await _feed(hass, clock, 3, 221, OTHER_SOURCE)
     await _after(hass, 31)  # resolved state was restored; startup sync is 30 s
     assert hass.states.get(STATE).state == "idle"
+
+
+# -- logging when the power sensor drops out ---------------------------------------------------
+
+
+async def test_outage_is_logged_once_and_recovery_once(hass: HomeAssistant, clock, caplog) -> None:
+    caplog.set_level(logging.INFO)
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)
+    await _drop_source(hass, clock, 30)
+    assert "is unavailable or not a number" not in caplog.text  # nothing while grace runs
+    await _after(hass, 61)
+    hass.states.async_set(SOURCE, STATE_UNKNOWN)  # more bad readings must not log again
+    hass.states.async_set(SOURCE, "abc")
+    await hass.async_block_till_done()
+    assert caplog.text.count("is unavailable or not a number") == 1
+
+    await _feed(hass, clock, 100, 200)
+    await _feed(hass, clock, 100, 201)
+    assert caplog.text.count("is reporting again") == 1
+
+
+async def test_recovery_inside_the_grace_period_logs_nothing(hass: HomeAssistant, clock, caplog) -> None:
+    caplog.set_level(logging.INFO)
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)
+    await _drop_source(hass, clock, 30)
+    await _feed(hass, clock, 100, 40)
+    assert "is unavailable or not a number" not in caplog.text
+    assert "is reporting again" not in caplog.text
+
+
+async def test_outage_with_grace_off_is_logged_immediately(hass: HomeAssistant, clock, caplog) -> None:
+    await _setup(hass, _entry(delay=0))  # the sensor is missing at setup, which also logs
+    await _settle(hass, clock, 100)
+    caplog.clear()
+    await _drop_source(hass, clock, 30)
+    assert caplog.text.count("is unavailable or not a number") == 1
+
+
+# -- repair issue for a missing profile ----------------------------------------------------------
+
+
+async def test_missing_profile_raises_a_repair_issue(hass: HomeAssistant, clock) -> None:
+    entry = _entry(profile="Deleted profile")
+    await _setup(hass, entry)
+    issue = ir.async_get(hass).async_get_issue(DOMAIN, f"profile_missing_{entry.entry_id}")
+    assert issue is not None
+    assert issue.translation_key == "profile_missing"
+    assert issue.translation_placeholders == {
+        "stove": "Pellet stove",
+        "profile": "Deleted profile",
+        "fallback": "Allure 50",
+    }
+    assert issue.is_fixable is False
+
+    assert await hass.config_entries.async_unload(entry.entry_id)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"profile_missing_{entry.entry_id}") is None
+
+
+async def test_existing_profile_has_no_repair_issue(hass: HomeAssistant, clock) -> None:
+    entry = _entry()
+    await _setup(hass, entry)
+    assert ir.async_get(hass).async_get_issue(DOMAIN, f"profile_missing_{entry.entry_id}") is None
+
+
+# -- diagnostics -----------------------------------------------------------------------------------
+
+
+async def test_diagnostics(hass: HomeAssistant, clock) -> None:
+    hass.states.async_set(SOURCE, "100", POWER_ATTRS)
+    entry = _entry()
+    await _setup(hass, entry)
+    await _feed(hass, clock, 100, 21)
+    data = await async_get_config_entry_diagnostics(hass, entry)
+    assert data["entry"]["options"][CONF_SOURCE] == SOURCE
+    assert data["profile"]["name"] == "Allure 50"
+    assert data["runtime"]["source_status"] == "ok"
+    assert data["runtime"]["available"] is True
+    assert data["runtime"]["keep_last_state_seconds"] == 60
+    assert data["runtime"]["moving_average"] == 100.0
+    assert data["source"]["entity_id"] == SOURCE
+    assert data["source"]["unit_of_measurement"] == "W"
+
+
+async def test_diagnostics_without_a_source(hass: HomeAssistant, clock) -> None:
+    entry = _entry()
+    await _setup(hass, entry)
+    data = await async_get_config_entry_diagnostics(hass, entry)
+    assert data["source"] is None
+    # No reading and nothing restored: waiting out the grace period, but nothing to show.
+    assert data["runtime"]["source_status"] == "grace"
+    assert data["runtime"]["available"] is False
+
+
+# -- translated entity names -----------------------------------------------------------------------
+
+
+async def test_entity_names_come_from_the_translations(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    assert hass.states.get(STATE).name == "Pellet stove State"
+    assert hass.states.get(GENERAL).name == "Pellet stove General state"
+    assert hass.states.get(ACTIVE).name == "Pellet stove Active"

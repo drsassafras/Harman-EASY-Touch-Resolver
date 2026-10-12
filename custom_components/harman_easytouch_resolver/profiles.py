@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any, cast
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -18,7 +19,7 @@ class ProfileStore:
     """Built-in profiles plus user-saved custom profiles."""
 
     def __init__(self, hass: HomeAssistant) -> None:
-        self._store: Store = Store(hass, 1, _KEY)
+        self._store: Store[dict[str, Any]] = Store(hass, 1, _KEY)
         self._custom: dict[str, Profile] = {}
 
     async def async_load(self) -> None:
@@ -52,7 +53,7 @@ async def async_get_profile_store(hass: HomeAssistant) -> ProfileStore:
         store = ProfileStore(hass)
         await store.async_load()
         domain_data["store"] = store
-    return domain_data["store"]
+    return cast(ProfileStore, domain_data["store"])
 
 
 async def async_save_profile(

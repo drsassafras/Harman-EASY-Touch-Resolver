@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import datetime
 from enum import Enum
+import logging
 import math
 import time
 
@@ -34,6 +36,8 @@ from .const import (
 from .engine import StoveEngine
 from .profile import Profile
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class _Source(Enum):
     """What the runtime currently knows about the power sensor."""
@@ -47,7 +51,9 @@ class _Source(Enum):
 class StoveRuntime:
     """Owns one stove's engine and notifies entities when anything changes."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, profile: Profile) -> None:
+    def __init__(
+        self, hass: HomeAssistant, entry: StoveConfigEntry, profile: Profile
+    ) -> None:
         self.hass = hass
         self.entry = entry
         self.profile = profile
@@ -58,6 +64,7 @@ class StoveRuntime:
         self._source = _Source.UNSEEN
         self._grace_cancel: Callable[[], None] | None = None
         self._last_sample_at: float | None = None
+        self._unavailable_logged = False
         self._listeners: list[Callable[[], None]] = []
         self._unsubs: list[Callable[[], None]] = []
 
@@ -70,6 +77,16 @@ class StoveRuntime:
     @property
     def general_state(self) -> str | None:
         return GENERAL_STATE_MAP.get(self.engine.committed) if self.engine.committed else None
+
+    @property
+    def source_entity(self) -> str:
+        """The power sensor this stove watches."""
+        return str(self.entry.options[CONF_SOURCE])
+
+    @property
+    def source_status(self) -> str:
+        """unseen, ok, grace or down. For diagnostics."""
+        return self._source.value
 
     @property
     def available(self) -> bool:
@@ -88,7 +105,7 @@ class StoveRuntime:
 
     @callback
     def async_start(self) -> None:
-        source = self.entry.options[CONF_SOURCE]
+        source = self.source_entity
         # A steady reading (same value and attributes) fires `state_reported`, not
         # `state_changed`. Both are samples for the moving average.
         self._unsubs = [
@@ -126,7 +143,7 @@ class StoveRuntime:
 
     def _schedule(self, delay: float, func: Callable[[], None]) -> Callable[[], None]:
         @callback
-        def _fire(_now) -> None:
+        def _fire(_now: datetime) -> None:
             func()
 
         return async_call_later(self.hass, delay, _fire)
@@ -162,6 +179,9 @@ class StoveRuntime:
             # The gap outlasted the averaging window; don't judge on a single reading.
             self.engine.restart_window()
         self._cancel_grace()
+        if self._unavailable_logged:
+            self._unavailable_logged = False
+            _LOGGER.info("Power sensor %s is reporting again", self.source_entity)
         self._source = _Source.OK
         self._last_sample_at = now
         self.engine.update_power(value, now)
@@ -182,11 +202,19 @@ class StoveRuntime:
         )
 
     @callback
-    def _grace_expired(self, _now) -> None:
+    def _grace_expired(self, _now: datetime) -> None:
         self._grace_cancel = None
         self._go_down()
 
     def _go_down(self) -> None:
+        if not self._unavailable_logged:
+            # Logged once per outage; the matching message is logged when readings return.
+            self._unavailable_logged = True
+            _LOGGER.warning(
+                "Power sensor %s is unavailable or not a number; "
+                "the entities of this stove are unavailable until it reports again",
+                self.source_entity,
+            )
         self._source = _Source.DOWN
         self.engine.reset_source()
         self._last_sample_at = None

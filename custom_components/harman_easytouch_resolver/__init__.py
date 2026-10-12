@@ -6,14 +6,19 @@ import logging
 
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import issue_registry as ir
 
-from .const import CONF_PROFILE, DEFAULT_PROFILE
+from .const import CONF_PROFILE, DEFAULT_PROFILE, DOMAIN
 from .profile import ALLURE_50
 from .profiles import async_get_profile_store
 from .runtime import StoveConfigEntry, StoveRuntime
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR]
+
+
+def _issue_id(entry: StoveConfigEntry) -> str:
+    return f"profile_missing_{entry.entry_id}"
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: StoveConfigEntry) -> bool:
@@ -23,6 +28,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: StoveConfigEntry) -> boo
     if profile is None:
         _LOGGER.warning("Profile '%s' not found; falling back to '%s'", name, ALLURE_50.name)
         profile = ALLURE_50
+        ir.async_create_issue(
+            hass,
+            DOMAIN,
+            _issue_id(entry),
+            is_fixable=False,
+            severity=ir.IssueSeverity.WARNING,
+            translation_key="profile_missing",
+            translation_placeholders={
+                "stove": entry.title,
+                "profile": name,
+                "fallback": ALLURE_50.name,
+            },
+        )
+    else:
+        ir.async_delete_issue(hass, DOMAIN, _issue_id(entry))
 
     runtime = StoveRuntime(hass, entry, profile)
     entry.runtime_data = runtime
@@ -40,4 +60,5 @@ async def _async_reload_on_update(hass: HomeAssistant, entry: StoveConfigEntry) 
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: StoveConfigEntry) -> bool:
+    ir.async_delete_issue(hass, DOMAIN, _issue_id(entry))
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
