@@ -1,0 +1,58 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a Harman EasyTouch stove",
+        "description": "Pick the power sensor (watts) for this stove. It is only used to build the 20 second moving average. Choose an existing profile, or choose \"Import / design a new profile\" to continue to the profile editor.",
+        "data": {
+          "name": "Stove name",
+          "source_entity": "Power sensor (watts)",
+          "profile": "Profile"
+        }
+      },
+      "import_profile": {
+        "title": "Import / design a profile",
+        "description": "Paste profile JSON, or edit the example below. The profile is saved under its \"name\" and used for this stove. Built-in profile names cannot be overwritten.",
+        "data": {
+          "profile_json": "Profile JSON"
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "The profile is not valid: {error}",
+      "reserved_name": "That name belongs to a built-in profile. Use a different \"name\"."
+    },
+    "abort": {
+      "already_configured": "A stove with this name already exists."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Harman EasyTouch options",
+        "menu_options": {
+          "settings": "Change power sensor or profile",
+          "import_profile": "Import / design a profile (JSON)"
+        }
+      },
+      "settings": {
+        "title": "Stove settings",
+        "data": {
+          "source_entity": "Power sensor (watts)",
+          "profile": "Profile"
+        }
+      },
+      "import_profile": {
+        "title": "Import / design a profile",
+        "description": "Paste profile JSON, or edit the current profile shown below. It is saved under its \"name\" and applied to this stove, so change the \"name\" to keep the original as well. Built-in profile names cannot be overwritten.",
+        "data": {
+          "profile_json": "Profile JSON"
+        }
+      }
+    },
+    "error": {
+      "invalid_profile": "The profile is not valid: {error}",
+      "reserved_name": "That name belongs to a built-in profile. Use a different \"name\"."
+    }
+  }
+}

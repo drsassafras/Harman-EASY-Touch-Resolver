@@ -1,0 +1,42 @@
+{
+  "entity": {
+    "sensor": {
+      "state": {
+        "default": "mdi:fireplace",
+        "state": {
+          "sensor_fault": "mdi:alert-circle",
+          "idle": "mdi:fireplace-off",
+          "extinguish": "mdi:fire-off",
+          "post_ignite": "mdi:fire-circle",
+          "fault_extinguish": "mdi:alert",
+          "cool_down": "mdi:fire-off",
+          "burn_1": "mdi:fire",
+          "burn_2": "mdi:fire",
+          "burn_3": "mdi:fire",
+          "burn_4": "mdi:fire",
+          "burn_5": "mdi:fire",
+          "burn_6": "mdi:fire",
+          "ignite": "mdi:fire-circle"
+        }
+      },
+      "general_state": {
+        "default": "mdi:fireplace",
+        "state": {
+          "Faulted": "mdi:alert-circle",
+          "Lighting": "mdi:fire-circle",
+          "Burning": "mdi:fire",
+          "Cooldown": "mdi:fire-off",
+          "Idle": "mdi:fireplace-off"
+        }
+      }
+    },
+    "binary_sensor": {
+      "active": {
+        "default": "mdi:fireplace-off",
+        "state": {
+          "on": "mdi:fireplace"
+        }
+      }
+    }
+  }
+}
