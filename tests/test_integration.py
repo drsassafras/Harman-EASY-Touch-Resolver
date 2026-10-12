@@ -118,7 +118,9 @@ async def test_device_and_unique_ids(hass: HomeAssistant, clock) -> None:
     assert registry.async_get(GENERAL).unique_id == f"{entry.entry_id}_general_state"
     assert registry.async_get(ACTIVE).unique_id == f"{entry.entry_id}_active"
 
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    device = dr.async_get(hass).async_get(registry.async_get(STATE).device_id)
+    assert device is not None
+    assert (DOMAIN, entry.entry_id) in device.identifiers
     assert device.name == "Pellet stove"
     assert device.manufacturer == "Harman"
     assert device.model == "Allure 50"  # the stove profile
@@ -136,7 +138,7 @@ async def test_device_model_follows_the_profile(hass: HomeAssistant, hass_storag
     }
     entry = _entry(profile="Allure 30")
     await _setup(hass, entry)
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    device = dr.async_get(hass).async_get(er.async_get(hass).async_get(STATE).device_id)
     assert device.model == "Allure 30"
 
 
