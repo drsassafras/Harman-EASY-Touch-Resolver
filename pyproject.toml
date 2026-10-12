@@ -7,3 +7,9 @@ pythonpath = ["."]
 python_version = "3.13"
 strict = true
 files = ["custom_components"]
+
+# Newer Home Assistant versions re-export names with `# noqa: F401` instead of `__all__`
+# (for example BinarySensorDeviceClass from 2026.10), which strict mode would reject.
+[[tool.mypy.overrides]]
+module = "homeassistant.*"
+implicit_reexport = true

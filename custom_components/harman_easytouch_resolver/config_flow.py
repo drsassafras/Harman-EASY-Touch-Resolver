@@ -68,6 +68,17 @@ _DELAY_SELECTOR = NumberSelector(
 _JSON_SELECTOR = TextSelector(TextSelectorConfig(multiline=True))
 
 
+def _schema(fields: dict[Any, Any]) -> Any:
+    """Build a form schema.
+
+    Home Assistant 2026.10 types the schema argument of `add_suggested_values_to_schema`
+    as a `probatio` schema, while 2026.9 and earlier expect a `voluptuous` one. `vol` is
+    the right library for whichever version is running (Home Assistant aliases it from
+    2026.10 on), so the result is typed as Any rather than naming either library.
+    """
+    return vol.Schema(fields)
+
+
 def _profile_selector(names: list[str], allow_import: bool = False) -> SelectSelector:
     options = [SelectOptionDict(value=n, label=n) for n in names]
     if allow_import:
@@ -133,7 +144,7 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
             else:
                 return self._create(user_input[CONF_PROFILE])
 
-        schema = vol.Schema(
+        schema = _schema(
             {
                 vol.Required(CONF_NAME): str,
                 vol.Required(CONF_SOURCE): _SOURCE_SELECTOR,
@@ -153,7 +164,7 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         placeholders: dict[str, str] = {}
-        schema = vol.Schema({vol.Required(CONF_PROFILE_JSON): _JSON_SELECTOR})
+        schema = _schema({vol.Required(CONF_PROFILE_JSON): _JSON_SELECTOR})
 
         if user_input is not None:
             profile, error = _check_profile_text(user_input[CONF_PROFILE_JSON])
@@ -192,7 +203,7 @@ class HarmanEasyTouchConfigFlow(ConfigFlow, domain=DOMAIN):
                 )
                 return self.async_abort(reason="reconfigure_successful")
 
-        schema = vol.Schema({vol.Required(CONF_SOURCE): _SOURCE_SELECTOR})
+        schema = _schema({vol.Required(CONF_SOURCE): _SOURCE_SELECTOR})
         return self.async_show_form(
             step_id="reconfigure",
             data_schema=self.add_suggested_values_to_schema(
@@ -249,7 +260,7 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
                     }
                 )
 
-        schema = vol.Schema(
+        schema = _schema(
             {
                 vol.Required(CONF_SOURCE): _SOURCE_SELECTOR,
                 vol.Required(CONF_PROFILE): _profile_selector(store.names),
@@ -277,7 +288,7 @@ class HarmanEasyTouchOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
         placeholders: dict[str, str] = {}
-        schema = vol.Schema({vol.Required(CONF_PROFILE_JSON): _JSON_SELECTOR})
+        schema = _schema({vol.Required(CONF_PROFILE_JSON): _JSON_SELECTOR})
 
         if user_input is not None:
             profile, error = _check_profile_text(user_input[CONF_PROFILE_JSON])
