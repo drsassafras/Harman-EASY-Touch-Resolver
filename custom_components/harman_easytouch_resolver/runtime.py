@@ -8,8 +8,19 @@ import time
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
-from homeassistant.core import Event, EventStateChangedData, HomeAssistant, State, callback
-from homeassistant.helpers.event import async_call_later, async_track_state_change_event
+from homeassistant.core import (
+    Event,
+    EventStateChangedData,
+    EventStateReportedData,
+    HomeAssistant,
+    State,
+    callback,
+)
+from homeassistant.helpers.event import (
+    async_call_later,
+    async_track_state_change_event,
+    async_track_state_report_event,
+)
 
 from .const import CONF_SOURCE, GENERAL_STATE_MAP
 from .engine import StoveEngine
@@ -26,7 +37,7 @@ class StoveRuntime:
         self.available = False
         self.engine = StoveEngine(profile, self._schedule, self._notify)
         self._listeners: list[Callable[[], None]] = []
-        self._unsub: Callable[[], None] | None = None
+        self._unsubs: list[Callable[[], None]] = []
 
     # -- derived values ---------------------------------------------------
 
@@ -43,16 +54,19 @@ class StoveRuntime:
     @callback
     def async_start(self) -> None:
         source = self.entry.options[CONF_SOURCE]
-        self._unsub = async_track_state_change_event(
-            self.hass, [source], self._handle_source_event
-        )
+        # A steady reading (same value and attributes) fires `state_reported`, not
+        # `state_changed`. Both are samples for the moving average.
+        self._unsubs = [
+            async_track_state_change_event(self.hass, [source], self._handle_source_event),
+            async_track_state_report_event(self.hass, [source], self._handle_source_report),
+        ]
         self._apply(self.hass.states.get(source))
 
     @callback
     def async_stop(self) -> None:
-        if self._unsub:
-            self._unsub()
-            self._unsub = None
+        for unsub in self._unsubs:
+            unsub()
+        self._unsubs = []
         self.engine.shutdown()
 
     # -- listeners ----------------------------------------------------------
@@ -83,6 +97,10 @@ class StoveRuntime:
 
     @callback
     def _handle_source_event(self, event: Event[EventStateChangedData]) -> None:
+        self._apply(event.data["new_state"])
+
+    @callback
+    def _handle_source_report(self, event: Event[EventStateReportedData]) -> None:
         self._apply(event.data["new_state"])
 
     def _apply(self, state: State | None) -> None:
