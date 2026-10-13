@@ -161,9 +161,9 @@ def test_the_import_option_and_state_attributes_are_translated():
         keys = _load(path)
         assert keys[f"selector.profile.options.{IMPORT_NEW}"].strip(), path.stem
         assert keys["entity.sensor.state.state_attributes.moving_average.name"].strip()
-        prefix = "entity.sensor.state.state_attributes.raw_state.state."
+        prefix = "entity.sensor.raw_state.state."
         assert {k[len(prefix):] for k in keys if k.startswith(prefix)} == set(ORDER), path.stem
-        assert keys["entity.sensor.state.state_attributes.raw_state.name"].strip()
+        assert keys["entity.sensor.raw_state.name"].strip()
 
 
 def test_translated_text_does_not_quote_the_english_import_label():
@@ -188,6 +188,7 @@ def test_icons_switch_with_the_state_and_never_default_to_a_lit_fireplace():
 
     icons = json.loads((COMPONENT / "icons.json").read_text())["entity"]
     state = icons["sensor"]["state"]
+    assert icons["sensor"]["raw_state"] == state  # the raw state looks like the resolved one
     general = icons["sensor"]["general_state"]
     active = icons["binary_sensor"]["active"]
 

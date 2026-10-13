@@ -24,6 +24,7 @@ async def async_get_config_entry_diagnostics(
             "keep_last_state_seconds": runtime.grace_seconds,
             "state": runtime.state,
             "general_state": runtime.general_state,
+            "raw_state": runtime.raw_state,
             **runtime.engine.attributes,
         },
         "source": (

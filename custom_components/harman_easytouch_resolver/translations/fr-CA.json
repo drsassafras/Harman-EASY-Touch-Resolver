@@ -138,24 +138,6 @@
           "ignite": "Allumage"
         },
         "state_attributes": {
-          "raw_state": {
-            "name": "État brut",
-            "state": {
-              "sensor_fault": "Défaut du capteur",
-              "idle": "Au repos",
-              "extinguish": "Extinction",
-              "post_ignite": "Post-allumage",
-              "fault_extinguish": "Extinction sur défaut",
-              "cool_down": "Refroidissement",
-              "burn_1": "Combustion 1",
-              "burn_2": "Combustion 2",
-              "burn_3": "Combustion 3",
-              "burn_4": "Combustion 4",
-              "burn_5": "Combustion 5",
-              "burn_6": "Combustion 6",
-              "ignite": "Allumage"
-            }
-          },
           "moving_average": {
             "name": "Moyenne mobile"
           }
@@ -169,6 +151,24 @@
           "burning": "Combustion",
           "cooldown": "Refroidissement",
           "idle": "Au repos"
+        }
+      },
+      "raw_state": {
+        "name": "État brut",
+        "state": {
+          "sensor_fault": "Défaut du capteur",
+          "idle": "Au repos",
+          "extinguish": "Extinction",
+          "post_ignite": "Post-allumage",
+          "fault_extinguish": "Extinction sur défaut",
+          "cool_down": "Refroidissement",
+          "burn_1": "Combustion 1",
+          "burn_2": "Combustion 2",
+          "burn_3": "Combustion 3",
+          "burn_4": "Combustion 4",
+          "burn_5": "Combustion 5",
+          "burn_6": "Combustion 6",
+          "ignite": "Allumage"
         }
       }
     },

@@ -367,7 +367,7 @@ def test_shutdown_without_pending_is_safe():
 
 
 def test_attributes_empty():
-    assert Harness().engine.attributes == {"raw_state": None, "moving_average": None}
+    assert Harness().engine.attributes == {"moving_average": None}
 
 
 def test_attributes_rounded():
@@ -376,4 +376,48 @@ def test_attributes_rounded():
     h.engine.update_power(10.09, 1)
     attrs = h.engine.attributes
     assert attrs["moving_average"] == 10.1
-    assert attrs["raw_state"] is None
+    assert "raw_state" not in attrs
+
+
+# -- tick (ageing the window without a new reading) -----------------------------------------------
+
+
+def test_tick_does_nothing_without_samples():
+    h = Harness()
+    h.engine.tick(100)
+    assert h.engine.moving_average is None
+    assert h.changes == 0
+
+
+def test_tick_ages_old_samples_out_but_keeps_the_newest():
+    h = Harness()
+    h.engine.update_power(170, 0)
+    h.engine.update_power(170, 10)
+    h.engine.update_power(170, 20)
+    assert h.engine.raw_state == "ignite"
+    h.engine.update_power(25, 21)
+    assert h.engine.raw_state == "burn_4"  # 122 W: old readings still dominate
+    assert h.engine.moving_average > 100
+    h.engine.tick(42)  # everything older than 22 s is gone, the 25 W reading stays
+    assert h.engine.moving_average == 25
+    assert h.engine.raw_state == "post_ignite"
+
+
+def test_tick_notifies_only_when_something_changed():
+    h = Harness()
+    h.engine.update_power(100, 0)
+    h.engine.update_power(100, 21)
+    before = h.changes
+    h.engine.tick(22)  # same average, same raw state
+    assert h.changes == before
+    h.engine.update_power(20, 23)
+    before = h.changes
+    h.engine.tick(60)
+    assert h.changes == before + 1
+
+
+def test_tick_before_a_full_window_does_not_judge():
+    h = Harness()
+    h.engine.update_power(100, 0)
+    h.engine.tick(5)
+    assert h.engine.raw_state is None

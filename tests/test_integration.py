@@ -8,7 +8,14 @@ import logging
 import pytest
 
 from homeassistant.config_entries import ConfigEntryState
-from homeassistant.const import CONF_NAME, STATE_OFF, STATE_ON, STATE_UNAVAILABLE, STATE_UNKNOWN
+from homeassistant.const import (
+    CONF_NAME,
+    STATE_OFF,
+    STATE_ON,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    EntityCategory,
+)
 from homeassistant.core import HomeAssistant, State
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -38,6 +45,7 @@ SOURCE = "sensor.stove_power"
 OTHER_SOURCE = "sensor.other_power"
 STATE = "sensor.pellet_stove_state"
 GENERAL = "sensor.pellet_stove_general_state"
+RAW = "sensor.pellet_stove_raw_state"
 ACTIVE = "binary_sensor.pellet_stove_active"
 POWER_ATTRS = {"device_class": "power", "unit_of_measurement": "W"}
 
@@ -128,6 +136,8 @@ async def test_device_and_unique_ids(hass: HomeAssistant, clock) -> None:
     registry = er.async_get(hass)
     assert registry.async_get(STATE).unique_id == f"{entry.entry_id}_state"
     assert registry.async_get(GENERAL).unique_id == f"{entry.entry_id}_general_state"
+    assert registry.async_get(RAW).unique_id == f"{entry.entry_id}_raw_state"
+    assert registry.async_get(RAW).entity_category is EntityCategory.DIAGNOSTIC
     assert registry.async_get(ACTIVE).unique_id == f"{entry.entry_id}_active"
 
     device = dr.async_get(hass).async_get(registry.async_get(STATE).device_id)
@@ -169,14 +179,14 @@ async def test_unknown_until_a_full_window_of_data(hass: HomeAssistant, clock) -
     await _feed(hass, clock, 100, 0)
     assert hass.states.get(STATE).state == STATE_UNKNOWN
     assert hass.states.get(STATE).attributes["moving_average"] == 100.0
-    assert hass.states.get(STATE).attributes["raw_state"] is None
+    assert hass.states.get(RAW).state == STATE_UNKNOWN
 
 
 async def test_burning_state(hass: HomeAssistant, clock) -> None:
     await _setup(hass, _entry())
     await _settle(hass, clock, 100)
     assert hass.states.get(STATE).state == "burn_2"
-    assert hass.states.get(STATE).attributes["raw_state"] == "burn_2"
+    assert hass.states.get(RAW).state == "burn_2"
     assert hass.states.get(STATE).attributes["moving_average"] == 100.0
     assert hass.states.get(GENERAL).state == "burning"
     assert hass.states.get(ACTIVE).state == STATE_ON
@@ -227,7 +237,7 @@ async def test_change_commits_only_after_the_delay(hass: HomeAssistant, clock) -
     await _setup(hass, _entry())
     await _settle(hass, clock, 100)  # burn_2
     await _feed(hass, clock, 110, 42)  # burn_3: sequp is 75 s
-    assert hass.states.get(STATE).attributes["raw_state"] == "burn_3"
+    assert hass.states.get(RAW).state == "burn_3"
     assert hass.states.get(STATE).state == "burn_2"
     await _after(hass, 74)
     assert hass.states.get(STATE).state == "burn_2"
@@ -251,9 +261,9 @@ async def test_source_unavailable_keeps_resolved_state_but_marks_entities_unavai
 
     await _feed(hass, clock, 100, 100)
     assert hass.states.get(STATE).state == "burn_2"  # remembered
-    assert hass.states.get(STATE).attributes["raw_state"] is None  # not re-evaluated yet
+    assert hass.states.get(RAW).state == STATE_UNKNOWN  # not re-evaluated yet
     await _feed(hass, clock, 100, 121)
-    assert hass.states.get(STATE).attributes["raw_state"] == "burn_2"
+    assert hass.states.get(RAW).state == "burn_2"
 
 
 # -- unavailable grace period -----------------------------------------------------------------
@@ -324,9 +334,9 @@ async def test_long_gap_inside_grace_needs_a_fresh_window(hass: HomeAssistant, c
     await _feed(hass, clock, 170, 55)  # back after 25 s: older than the 20 s window
     assert hass.states.get(STATE).state == "burn_2"
     assert hass.states.get(STATE).attributes["moving_average"] == 170.0
-    assert hass.states.get(STATE).attributes["raw_state"] == "burn_2"  # not judged on 1 sample
+    assert hass.states.get(RAW).state == "burn_2"  # not judged on 1 sample
     await _feed(hass, clock, 170, 76)  # full window again
-    assert hass.states.get(STATE).attributes["raw_state"] == "ignite"
+    assert hass.states.get(RAW).state == "ignite"
 
 
 # -- restart: restored state is shown while the power sensor comes online ----------------------
@@ -552,3 +562,29 @@ async def test_entity_names_come_from_the_translations(hass: HomeAssistant, cloc
     assert hass.states.get(STATE).name == "Pellet stove State"
     assert hass.states.get(GENERAL).name == "Pellet stove General state"
     assert hass.states.get(ACTIVE).name == "Pellet stove Active"
+
+
+async def test_the_window_ages_out_without_new_readings(hass: HomeAssistant, clock) -> None:
+    """A sensor that only reports on change must not leave old readings in the average."""
+    await _setup(hass, _entry())
+    await _feed(hass, clock, 170, 0)  # igniter on
+    await _feed(hass, clock, 170, 10)
+    await _feed(hass, clock, 170, 20)
+    assert hass.states.get(RAW).state == "ignite"
+    await _feed(hass, clock, 25, 21)  # igniter off, then the sensor goes quiet
+    assert hass.states.get(STATE).attributes["moving_average"] > 100  # still mostly old data
+
+    clock.now = 43  # 22 s after the first low reading: the 170 W readings are out of the window
+    await _after(hass, 1)
+    assert hass.states.get(STATE).attributes["moving_average"] == 25.0
+    assert hass.states.get(RAW).state == "post_ignite"
+
+
+async def test_no_ticking_while_the_source_is_down(hass: HomeAssistant, clock) -> None:
+    await _setup(hass, _entry())
+    await _settle(hass, clock, 100)
+    hass.states.async_set(SOURCE, STATE_UNAVAILABLE)
+    await hass.async_block_till_done()
+    clock.now = 500
+    await _after(hass, 1)  # must not raise or change anything while the sensor is gone
+    assert hass.states.get(STATE).state == "burn_2"

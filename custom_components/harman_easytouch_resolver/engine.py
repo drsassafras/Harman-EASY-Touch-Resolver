@@ -49,15 +49,37 @@ class StoveEngine:
         if self._first_sample_at is None:
             self._first_sample_at = now
         self._samples.append((now, value))
+        self._evaluate(now)
+        self._on_change()
+
+    def tick(self, now: float) -> None:
+        """Let old readings age out of the window even when no new reading arrives.
+
+        Many power sensors only report when the value changes. Without this, the readings
+        from before a big change (for example the igniter switching off) would stay in the
+        average until the next report, and the state would lag far behind the stove.
+        The newest reading is always kept, so a steady value keeps counting.
+        """
+        if not self._samples:
+            return
+        before = self.moving_average
+        raw_before = self.raw_state
+        self._evaluate(now)
+        if self.moving_average != before or self.raw_state != raw_before:
+            self._on_change()
+
+    def _evaluate(self, now: float) -> None:
         cutoff = now - MOVING_AVERAGE_SECONDS
-        while self._samples and self._samples[0][0] < cutoff:
+        while len(self._samples) > 1 and self._samples[0][0] < cutoff:
             self._samples.popleft()
         self.moving_average = sum(v for _, v in self._samples) / len(self._samples)
 
         # Until a full window of data exists the average is not trustworthy.
-        if now - self._first_sample_at >= MOVING_AVERAGE_SECONDS:
+        if (
+            self._first_sample_at is not None
+            and now - self._first_sample_at >= MOVING_AVERAGE_SECONDS
+        ):
             self._handle_raw(self.profile.raw_state(self.moving_average))
-        self._on_change()
 
     def reset_source(self) -> None:
         """Source went unavailable: drop everything transient, keep resolved state."""
@@ -134,7 +156,6 @@ class StoveEngine:
     @property
     def attributes(self) -> dict[str, Any]:
         return {
-            "raw_state": self.raw_state,
             "moving_average": (
                 round(self.moving_average, 1) if self.moving_average is not None else None
             ),

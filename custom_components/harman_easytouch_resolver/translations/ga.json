@@ -138,24 +138,6 @@
           "ignite": "Adhaint"
         },
         "state_attributes": {
-          "raw_state": {
-            "name": "Staid amh",
-            "state": {
-              "sensor_fault": "Locht braiteora",
-              "idle": "Díomhaoin",
-              "extinguish": "Múchadh",
-              "post_ignite": "Iar-adhaint",
-              "fault_extinguish": "Múchadh locht",
-              "cool_down": "Fuarú",
-              "burn_1": "Dó 1",
-              "burn_2": "Dó 2",
-              "burn_3": "Dó 3",
-              "burn_4": "Dó 4",
-              "burn_5": "Dó 5",
-              "burn_6": "Dó 6",
-              "ignite": "Adhaint"
-            }
-          },
           "moving_average": {
             "name": "Meán gluaiseachta"
           }
@@ -169,6 +151,24 @@
           "burning": "Ag dó",
           "cooldown": "Fuarú",
           "idle": "Díomhaoin"
+        }
+      },
+      "raw_state": {
+        "name": "Staid amh",
+        "state": {
+          "sensor_fault": "Locht braiteora",
+          "idle": "Díomhaoin",
+          "extinguish": "Múchadh",
+          "post_ignite": "Iar-adhaint",
+          "fault_extinguish": "Múchadh locht",
+          "cool_down": "Fuarú",
+          "burn_1": "Dó 1",
+          "burn_2": "Dó 2",
+          "burn_3": "Dó 3",
+          "burn_4": "Dó 4",
+          "burn_5": "Dó 5",
+          "burn_6": "Dó 6",
+          "ignite": "Adhaint"
         }
       }
     },

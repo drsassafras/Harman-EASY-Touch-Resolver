@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 import logging
 import math
@@ -24,6 +24,7 @@ from homeassistant.helpers.event import (
     async_call_later,
     async_track_state_change_event,
     async_track_state_report_event,
+    async_track_time_interval,
 )
 
 from .const import (
@@ -37,6 +38,9 @@ from .engine import StoveEngine
 from .profile import Profile
 
 _LOGGER = logging.getLogger(__name__)
+
+# How often old readings are aged out of the averaging window (see StoveEngine.tick).
+_TICK_INTERVAL = timedelta(seconds=1)
 
 
 class _Source(Enum):
@@ -75,6 +79,10 @@ class StoveRuntime:
         return self.engine.committed
 
     @property
+    def raw_state(self) -> str | None:
+        return self.engine.raw_state
+
+    @property
     def general_state(self) -> str | None:
         return GENERAL_STATE_MAP.get(self.engine.committed) if self.engine.committed else None
 
@@ -111,6 +119,7 @@ class StoveRuntime:
         self._unsubs = [
             async_track_state_change_event(self.hass, [source], self._handle_source_event),
             async_track_state_report_event(self.hass, [source], self._handle_source_report),
+            async_track_time_interval(self.hass, self._handle_tick, _TICK_INTERVAL),
         ]
         self._apply(self.hass.states.get(source))
 
@@ -147,6 +156,12 @@ class StoveRuntime:
             func()
 
         return async_call_later(self.hass, delay, _fire)
+
+    @callback
+    def _handle_tick(self, _now: datetime) -> None:
+        # Only while readings are arriving; during an outage the last state is held.
+        if self._source is _Source.OK:
+            self.engine.tick(time.monotonic())
 
     @callback
     def _handle_source_event(self, event: Event[EventStateChangedData]) -> None:

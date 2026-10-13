@@ -30,6 +30,25 @@
           "idle": "mdi:fireplace-off",
           "unknown": "mdi:help-circle-outline"
         }
+      },
+      "raw_state": {
+        "default": "mdi:fireplace-off",
+        "state": {
+          "sensor_fault": "mdi:alert-circle",
+          "idle": "mdi:fireplace-off",
+          "extinguish": "mdi:fireplace",
+          "post_ignite": "mdi:fire-circle",
+          "fault_extinguish": "mdi:alert",
+          "cool_down": "mdi:fireplace",
+          "burn_1": "mdi:fire",
+          "burn_2": "mdi:fire",
+          "burn_3": "mdi:fire",
+          "burn_4": "mdi:fire",
+          "burn_5": "mdi:fire",
+          "burn_6": "mdi:fire",
+          "ignite": "mdi:fire-circle",
+          "unknown": "mdi:help-circle-outline"
+        }
       }
     },
     "binary_sensor": {

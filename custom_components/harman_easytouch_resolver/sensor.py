@@ -1,4 +1,4 @@
-"""Sensors: resolved state (with raw_state / moving_average attributes) and general state."""
+"""Sensors: resolved state, general state, and the raw (not yet delayed) state."""
 
 from __future__ import annotations
 
@@ -7,6 +7,7 @@ from typing import Any
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import HomeAssistant
+from homeassistant.const import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import GENERAL_STATE_OPTIONS, ORDER
@@ -21,7 +22,13 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: StoveConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     runtime = entry.runtime_data
-    async_add_entities([StoveStateSensor(runtime), StoveGeneralStateSensor(runtime)])
+    async_add_entities(
+        [
+            StoveStateSensor(runtime),
+            StoveGeneralStateSensor(runtime),
+            StoveRawStateSensor(runtime),
+        ]
+    )
 
 
 class StoveStateSensor(StoveEntity, SensorEntity):
@@ -61,3 +68,23 @@ class StoveGeneralStateSensor(StoveEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         return self.runtime.general_state
+
+
+class StoveRawStateSensor(StoveEntity, SensorEntity):
+    """What the power level says right now, before the per-state delays are applied.
+
+    Handy for tuning a profile: compare it with the resolved State to see which delay held
+    a change back.
+    """
+
+    _attr_translation_key = "raw_state"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = ORDER
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, runtime: StoveRuntime) -> None:
+        super().__init__(runtime, "raw_state")
+
+    @property
+    def native_value(self) -> str | None:
+        return self.runtime.raw_state

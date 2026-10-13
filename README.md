@@ -23,7 +23,8 @@ Each stove you add creates one device with:
 
 | Entity | Description |
 |---|---|
-| **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. Has `raw_state` and `moving_average` attributes. |
+| **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. Has a `moving_average` attribute (the 20 second average, in watts). |
+| **Raw state** (sensor, diagnostic) | What the power level says right now, before the per-state delays are applied. Compare it with **State** to see which delay held a change back, which makes tuning a profile much easier. |
 | **General state** (sensor) | A simplified view: `faulted`, `lighting`, `burning`, `cooldown`, `idle`. Shown translated in your language. |
 | **Active** (binary sensor) | On while the general state is `lighting`, `burning` or `cooldown`, so it stays on until the stove has finished cooling down. |
 

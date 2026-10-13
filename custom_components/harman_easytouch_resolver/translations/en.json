@@ -138,24 +138,6 @@
           "ignite": "Ignite"
         },
         "state_attributes": {
-          "raw_state": {
-            "name": "Raw state",
-            "state": {
-              "sensor_fault": "Sensor fault",
-              "idle": "Idle",
-              "extinguish": "Extinguish",
-              "post_ignite": "Post ignite",
-              "fault_extinguish": "Fault extinguish",
-              "cool_down": "Cool down",
-              "burn_1": "Burn 1",
-              "burn_2": "Burn 2",
-              "burn_3": "Burn 3",
-              "burn_4": "Burn 4",
-              "burn_5": "Burn 5",
-              "burn_6": "Burn 6",
-              "ignite": "Ignite"
-            }
-          },
           "moving_average": {
             "name": "Moving average"
           }
@@ -169,6 +151,24 @@
           "burning": "Burning",
           "cooldown": "Cooldown",
           "idle": "Idle"
+        }
+      },
+      "raw_state": {
+        "name": "Raw state",
+        "state": {
+          "sensor_fault": "Sensor fault",
+          "idle": "Idle",
+          "extinguish": "Extinguish",
+          "post_ignite": "Post ignite",
+          "fault_extinguish": "Fault extinguish",
+          "cool_down": "Cool down",
+          "burn_1": "Burn 1",
+          "burn_2": "Burn 2",
+          "burn_3": "Burn 3",
+          "burn_4": "Burn 4",
+          "burn_5": "Burn 5",
+          "burn_6": "Burn 6",
+          "ignite": "Ignite"
         }
       }
     },

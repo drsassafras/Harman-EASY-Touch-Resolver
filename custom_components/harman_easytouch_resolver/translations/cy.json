@@ -138,24 +138,6 @@
           "ignite": "Tanio"
         },
         "state_attributes": {
-          "raw_state": {
-            "name": "Cyflwr crai",
-            "state": {
-              "sensor_fault": "Nam synhwyrydd",
-              "idle": "Segur",
-              "extinguish": "Diffodd",
-              "post_ignite": "Ôl-danio",
-              "fault_extinguish": "Diffodd nam",
-              "cool_down": "Oeri",
-              "burn_1": "Llosgi 1",
-              "burn_2": "Llosgi 2",
-              "burn_3": "Llosgi 3",
-              "burn_4": "Llosgi 4",
-              "burn_5": "Llosgi 5",
-              "burn_6": "Llosgi 6",
-              "ignite": "Tanio"
-            }
-          },
           "moving_average": {
             "name": "Cyfartaledd symudol"
           }
@@ -169,6 +151,24 @@
           "burning": "Llosgi",
           "cooldown": "Oeri",
           "idle": "Segur"
+        }
+      },
+      "raw_state": {
+        "name": "Cyflwr crai",
+        "state": {
+          "sensor_fault": "Nam synhwyrydd",
+          "idle": "Segur",
+          "extinguish": "Diffodd",
+          "post_ignite": "Ôl-danio",
+          "fault_extinguish": "Diffodd nam",
+          "cool_down": "Oeri",
+          "burn_1": "Llosgi 1",
+          "burn_2": "Llosgi 2",
+          "burn_3": "Llosgi 3",
+          "burn_4": "Llosgi 4",
+          "burn_5": "Llosgi 5",
+          "burn_6": "Llosgi 6",
+          "ignite": "Tanio"
         }
       }
     },
