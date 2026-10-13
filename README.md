@@ -29,6 +29,10 @@ Each stove you add creates one device with:
 | **General state** (sensor) | A simplified view: `faulted`, `lighting`, `burning`, `cooldown`, `idle`. Shown translated in your language. |
 | **Active** (binary sensor) | On while the general state is `lighting`, `burning` or `cooldown`, so it stays on until the stove has finished cooling down. |
 
+## Upgrading to 0.3.1
+
+The **State** sensor no longer has `raw_state` and `moving_average` attributes. They are now two separate diagnostic sensors, **Raw state** and **Moving average**, and both are disabled by default (see the table above for how to enable them). If a template, automation or dashboard card reads `state_attr('sensor.<stove>_state', 'moving_average')` or `'raw_state'`, point it at the new sensor instead.
+
 ## Upgrading to 0.3.0 (breaking change)
 
 The **General state** sensor's values changed from `Faulted`, `Lighting`, `Burning`, `Cooldown`, `Idle` to the lowercase `faulted`, `lighting`, `burning`, `cooldown`, `idle`, so Home Assistant can translate them. Update anything that compares against the old values: automations, templates, scripts, dashboards and conditional cards. Look for the old capitalised words.
