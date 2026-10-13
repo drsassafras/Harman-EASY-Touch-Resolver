@@ -136,11 +136,6 @@
           "burn_5": "Llosgi 5",
           "burn_6": "Llosgi 6",
           "ignite": "Tanio"
-        },
-        "state_attributes": {
-          "moving_average": {
-            "name": "Cyfartaledd symudol"
-          }
         }
       },
       "general_state": {
@@ -170,6 +165,9 @@
           "burn_6": "Llosgi 6",
           "ignite": "Tanio"
         }
+      },
+      "moving_average": {
+        "name": "Cyfartaledd symudol"
       }
     },
     "binary_sensor": {

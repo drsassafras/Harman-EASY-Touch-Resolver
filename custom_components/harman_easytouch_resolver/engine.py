@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections import deque
 from collections.abc import Callable
-from typing import Any
 
 from .const import (
     DEFAULT_TIMING,
@@ -150,13 +149,3 @@ class StoveEngine:
         if self._pending_cancel is not None:
             self._pending_cancel()
             self._pending_cancel = None
-
-    # -- outputs --------------------------------------------------------
-
-    @property
-    def attributes(self) -> dict[str, Any]:
-        return {
-            "moving_average": (
-                round(self.moving_average, 1) if self.moving_average is not None else None
-            ),
-        }

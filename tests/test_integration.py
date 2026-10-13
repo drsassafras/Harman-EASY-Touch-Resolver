@@ -46,6 +46,7 @@ OTHER_SOURCE = "sensor.other_power"
 STATE = "sensor.pellet_stove_state"
 GENERAL = "sensor.pellet_stove_general_state"
 RAW = "sensor.pellet_stove_raw_state"
+AVERAGE = "sensor.pellet_stove_moving_average"
 ACTIVE = "binary_sensor.pellet_stove_active"
 POWER_ATTRS = {"device_class": "power", "unit_of_measurement": "W"}
 
@@ -138,6 +139,8 @@ async def test_device_and_unique_ids(hass: HomeAssistant, clock) -> None:
     assert registry.async_get(GENERAL).unique_id == f"{entry.entry_id}_general_state"
     assert registry.async_get(RAW).unique_id == f"{entry.entry_id}_raw_state"
     assert registry.async_get(RAW).entity_category is EntityCategory.DIAGNOSTIC
+    assert registry.async_get(AVERAGE).unique_id == f"{entry.entry_id}_moving_average"
+    assert registry.async_get(AVERAGE).entity_category is EntityCategory.DIAGNOSTIC
     assert registry.async_get(ACTIVE).unique_id == f"{entry.entry_id}_active"
 
     device = dr.async_get(hass).async_get(registry.async_get(STATE).device_id)
@@ -178,7 +181,7 @@ async def test_unknown_until_a_full_window_of_data(hass: HomeAssistant, clock) -
     await _setup(hass, _entry())
     await _feed(hass, clock, 100, 0)
     assert hass.states.get(STATE).state == STATE_UNKNOWN
-    assert hass.states.get(STATE).attributes["moving_average"] == 100.0
+    assert float(hass.states.get(AVERAGE).state) == 100.0
     assert hass.states.get(RAW).state == STATE_UNKNOWN
 
 
@@ -187,7 +190,7 @@ async def test_burning_state(hass: HomeAssistant, clock) -> None:
     await _settle(hass, clock, 100)
     assert hass.states.get(STATE).state == "burn_2"
     assert hass.states.get(RAW).state == "burn_2"
-    assert hass.states.get(STATE).attributes["moving_average"] == 100.0
+    assert float(hass.states.get(AVERAGE).state) == 100.0
     assert hass.states.get(GENERAL).state == "burning"
     assert hass.states.get(ACTIVE).state == STATE_ON
 
@@ -333,7 +336,7 @@ async def test_long_gap_inside_grace_needs_a_fresh_window(hass: HomeAssistant, c
     await _drop_source(hass, clock, 30)
     await _feed(hass, clock, 170, 55)  # back after 25 s: older than the 20 s window
     assert hass.states.get(STATE).state == "burn_2"
-    assert hass.states.get(STATE).attributes["moving_average"] == 170.0
+    assert float(hass.states.get(AVERAGE).state) == 170.0
     assert hass.states.get(RAW).state == "burn_2"  # not judged on 1 sample
     await _feed(hass, clock, 170, 76)  # full window again
     assert hass.states.get(RAW).state == "ignite"
@@ -391,7 +394,7 @@ async def test_source_present_at_setup_is_used_immediately(hass: HomeAssistant, 
     hass.states.async_set(SOURCE, "100", POWER_ATTRS)
     await _setup(hass, _entry())
     assert hass.states.get(STATE).state == STATE_UNKNOWN  # available, window not full
-    assert hass.states.get(STATE).attributes["moving_average"] == 100.0
+    assert float(hass.states.get(AVERAGE).state) == 100.0
 
 
 # -- restore ---------------------------------------------------------------------------------------
@@ -572,11 +575,11 @@ async def test_the_window_ages_out_without_new_readings(hass: HomeAssistant, clo
     await _feed(hass, clock, 170, 20)
     assert hass.states.get(RAW).state == "ignite"
     await _feed(hass, clock, 25, 21)  # igniter off, then the sensor goes quiet
-    assert hass.states.get(STATE).attributes["moving_average"] > 100  # still mostly old data
+    assert float(hass.states.get(AVERAGE).state) > 100  # still mostly old data
 
     clock.now = 43  # 22 s after the first low reading: the 170 W readings are out of the window
     await _after(hass, 1)
-    assert hass.states.get(STATE).attributes["moving_average"] == 25.0
+    assert float(hass.states.get(AVERAGE).state) == 25.0
     assert hass.states.get(RAW).state == "post_ignite"
 
 

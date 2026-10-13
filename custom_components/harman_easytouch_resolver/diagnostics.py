@@ -25,7 +25,11 @@ async def async_get_config_entry_diagnostics(
             "state": runtime.state,
             "general_state": runtime.general_state,
             "raw_state": runtime.raw_state,
-            **runtime.engine.attributes,
+            "moving_average": (
+                None
+                if runtime.engine.moving_average is None
+                else round(runtime.engine.moving_average, 1)
+            ),
         },
         "source": (
             None

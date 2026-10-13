@@ -136,11 +136,6 @@
           "burn_5": "Dó 5",
           "burn_6": "Dó 6",
           "ignite": "Adhaint"
-        },
-        "state_attributes": {
-          "moving_average": {
-            "name": "Meán gluaiseachta"
-          }
         }
       },
       "general_state": {
@@ -170,6 +165,9 @@
           "burn_6": "Dó 6",
           "ignite": "Adhaint"
         }
+      },
+      "moving_average": {
+        "name": "Meán gluaiseachta"
       }
     },
     "binary_sensor": {

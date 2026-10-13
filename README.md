@@ -23,7 +23,8 @@ Each stove you add creates one device with:
 
 | Entity | Description |
 |---|---|
-| **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. Has a `moving_average` attribute (the 20 second average, in watts). |
+| **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. |
+| **Moving average** (sensor, diagnostic) | The 20 second average of the power sensor, in watts. This is the number the profile's thresholds are compared with. |
 | **Raw state** (sensor, diagnostic) | What the power level says right now, before the per-state delays are applied. Compare it with **State** to see which delay held a change back, which makes tuning a profile much easier. |
 | **General state** (sensor) | A simplified view: `faulted`, `lighting`, `burning`, `cooldown`, `idle`. Shown translated in your language. |
 | **Active** (binary sensor) | On while the general state is `lighting`, `burning` or `cooldown`, so it stays on until the stove has finished cooling down. |
@@ -129,7 +130,7 @@ Entity ids follow your stove name, so replace `living_room_stove` with yours.
 
 Every stove is a little different. To tune a profile:
 
-1. Open the **State** entity and look at its `moving_average` attribute (under **Attributes** in the entity dialog, or in Developer Tools → States).
+1. Open the **Moving average** diagnostic sensor (on the stove's device page, or in Developer Tools → States) and watch it.
 2. Watch the value as the stove goes through a normal cycle: lighting, each burn level, cooldown and off.
 3. Note the watts at each stage and use them to adjust the thresholds in a custom profile.
 4. Adjust the timings if states change too slowly or flap.
@@ -138,11 +139,11 @@ Every stove is a little different. To tune a profile:
 
 Profiles are JSON with a `name`, `thresholds` and optional `timings`.
 
-Thresholds and timings both refer to the `moving_average` attribute, and all five timing keys are optional.
+Thresholds and timings both refer to the **Moving average** sensor, and all five timing keys are optional.
 
 ### Thresholds
 
-Each value is the lower limit of a state, in watts. A state applies when the sensor's `moving_average` is above that state's threshold and not above the next state's threshold up. Values must strictly decrease from `ignite` down to `idle`. At or below the `idle` value the state is `sensor_fault`.
+Each value is the lower limit of a state, in watts. A state applies when the **Moving average** is above that state's threshold and not above the next state's threshold up. Values must strictly decrease from `ignite` down to `idle`. At or below the `idle` value the state is `sensor_fault`.
 
 ### Timings
 
@@ -207,15 +208,15 @@ A state that has no entry in `timings` at all waits 3 seconds for every kind of 
 |---|---|
 | Entities are unavailable | The power sensor has been unavailable, unknown or not numeric for longer than the keep-last-state time. |
 | State is `unknown` | Waiting for the first 20 seconds of readings. |
-| State flaps between two levels | Thresholds sit too close to the stove's real power at that level. Check `moving_average` and move the threshold. Increase the timings for that state. |
-| State is stuck on `sensor_fault` | `moving_average` is at or below the profile's `idle` value. Check the sensor's units are watts. |
+| State flaps between two levels | Thresholds sit too close to the stove's real power at that level. Check the **Moving average** sensor and move the threshold. Increase the timings for that state. |
+| State is stuck on `sensor_fault` | **Moving average** is at or below the profile's `idle` value. Check the sensor's units are watts. |
 | "Profile not found" in the log, or a repair item | A stove refers to a profile that no longer exists. It falls back to `Allure 50` until you choose another in the options. |
 
 ## Translations
 
 English, Canadian French, Irish and Welsh. The Irish and Welsh have not been reviewed by native speakers; corrections are welcome.
 
-Translated: entity names, every state of both sensors, the names and values of the **State** sensor's attributes, the setup, options and reconfigure forms (including the profile dropdown entry and every profile error message), and repair messages.
+Translated: entity names, every state of both sensors, the setup, options and reconfigure forms (including the profile dropdown entry and every profile error message), and repair messages.
 
 Not translated: log messages, diagnostics and this README, because Home Assistant does not translate those, and the keys of the profile JSON (`name`, `thresholds`, `timings` and the state names inside them), which are fixed.
 

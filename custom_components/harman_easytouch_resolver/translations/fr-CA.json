@@ -136,11 +136,6 @@
           "burn_5": "Combustion 5",
           "burn_6": "Combustion 6",
           "ignite": "Allumage"
-        },
-        "state_attributes": {
-          "moving_average": {
-            "name": "Moyenne mobile"
-          }
         }
       },
       "general_state": {
@@ -170,6 +165,9 @@
           "burn_6": "Combustion 6",
           "ignite": "Allumage"
         }
+      },
+      "moving_average": {
+        "name": "Moyenne mobile"
       }
     },
     "binary_sensor": {

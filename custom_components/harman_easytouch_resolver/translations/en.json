@@ -136,11 +136,6 @@
           "burn_5": "Burn 5",
           "burn_6": "Burn 6",
           "ignite": "Ignite"
-        },
-        "state_attributes": {
-          "moving_average": {
-            "name": "Moving average"
-          }
         }
       },
       "general_state": {
@@ -170,6 +165,9 @@
           "burn_6": "Burn 6",
           "ignite": "Ignite"
         }
+      },
+      "moving_average": {
+        "name": "Moving average"
       }
     },
     "binary_sensor": {

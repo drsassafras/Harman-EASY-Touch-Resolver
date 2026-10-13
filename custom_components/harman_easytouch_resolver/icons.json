@@ -49,6 +49,9 @@
           "ignite": "mdi:fire-circle",
           "unknown": "mdi:help-circle-outline"
         }
+      },
+      "moving_average": {
+        "default": "mdi:chart-line"
       }
     },
     "binary_sensor": {

@@ -363,22 +363,6 @@ def test_shutdown_without_pending_is_safe():
     Harness().engine.shutdown()
 
 
-# -- attributes -----------------------------------------------------------------------------------
-
-
-def test_attributes_empty():
-    assert Harness().engine.attributes == {"moving_average": None}
-
-
-def test_attributes_rounded():
-    h = Harness()
-    h.engine.update_power(10.04, 0)
-    h.engine.update_power(10.09, 1)
-    attrs = h.engine.attributes
-    assert attrs["moving_average"] == 10.1
-    assert "raw_state" not in attrs
-
-
 # -- tick (ageing the window without a new reading) -----------------------------------------------
 
 

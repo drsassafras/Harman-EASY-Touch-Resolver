@@ -1,13 +1,10 @@
-"""Sensors: resolved state, general state, and the raw (not yet delayed) state."""
+"""Sensors: resolved state, general state, and two diagnostics (raw state, moving average)."""
 
 from __future__ import annotations
 
-from collections.abc import Mapping
-from typing import Any
-
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
+from homeassistant.const import EntityCategory, UnitOfPower
 from homeassistant.core import HomeAssistant
-from homeassistant.const import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import GENERAL_STATE_OPTIONS, ORDER
@@ -27,6 +24,7 @@ async def async_setup_entry(
             StoveStateSensor(runtime),
             StoveGeneralStateSensor(runtime),
             StoveRawStateSensor(runtime),
+            StoveMovingAverageSensor(runtime),
         ]
     )
 
@@ -49,10 +47,6 @@ class StoveStateSensor(StoveEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         return self.runtime.state
-
-    @property
-    def extra_state_attributes(self) -> Mapping[str, Any]:
-        return self.runtime.engine.attributes
 
 
 class StoveGeneralStateSensor(StoveEntity, SensorEntity):
@@ -88,3 +82,22 @@ class StoveRawStateSensor(StoveEntity, SensorEntity):
     @property
     def native_value(self) -> str | None:
         return self.runtime.raw_state
+
+
+class StoveMovingAverageSensor(StoveEntity, SensorEntity):
+    """The 20 second average of the power sensor, the number the profile's thresholds use."""
+
+    _attr_translation_key = "moving_average"
+    _attr_device_class = SensorDeviceClass.POWER
+    _attr_native_unit_of_measurement = UnitOfPower.WATT
+    _attr_state_class = SensorStateClass.MEASUREMENT
+    _attr_suggested_display_precision = 1
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, runtime: StoveRuntime) -> None:
+        super().__init__(runtime, "moving_average")
+
+    @property
+    def native_value(self) -> float | None:
+        average = self.runtime.engine.moving_average
+        return None if average is None else round(average, 1)
