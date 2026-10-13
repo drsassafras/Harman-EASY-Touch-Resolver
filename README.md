@@ -24,8 +24,8 @@ Each stove you add creates one device with:
 | Entity | Description |
 |---|---|
 | **State** (sensor) | The resolved state: `sensor_fault`, `idle`, `extinguish`, `post_ignite`, `fault_extinguish`, `cool_down`, `burn_1` to `burn_6`, `ignite`. |
-| **Moving average** (sensor, diagnostic) | The 20 second average of the power sensor, in watts. This is the number the profile's thresholds are compared with. |
-| **Raw state** (sensor, diagnostic) | What the power level says right now, before the per-state delays are applied. Compare it with **State** to see which delay held a change back, which makes tuning a profile much easier. |
+| **Moving average** (sensor, diagnostic, disabled by default) | The 20 second average of the power sensor, in watts. This is the number the profile's thresholds are compared with. |
+| **Raw state** (sensor, diagnostic, disabled by default) | What the power level says right now, before the per-state delays are applied. Compare it with **State** to see which delay held a change back, which makes tuning a profile much easier. |
 | **General state** (sensor) | A simplified view: `faulted`, `lighting`, `burning`, `cooldown`, `idle`. Shown translated in your language. |
 | **Active** (binary sensor) | On while the general state is `lighting`, `burning` or `cooldown`, so it stays on until the stove has finished cooling down. |
 
@@ -130,7 +130,7 @@ Entity ids follow your stove name, so replace `living_room_stove` with yours.
 
 Every stove is a little different. To tune a profile:
 
-1. Open the **Moving average** diagnostic sensor (on the stove's device page, or in Developer Tools → States) and watch it.
+1. Enable the two diagnostic sensors, **Moving average** and **Raw state**. They are off by default: open the stove's device page, click the "entities not shown" link, open each one, then **Settings** (the cog) and turn on **Enabled**. Then watch **Moving average** (on the device page, or in Developer Tools → States).
 2. Watch the value as the stove goes through a normal cycle: lighting, each burn level, cooldown and off.
 3. Note the watts at each stage and use them to adjust the thresholds in a custom profile.
 4. Adjust the timings if states change too slowly or flap.

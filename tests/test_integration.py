@@ -84,8 +84,22 @@ def _entry(
     )
 
 
-async def _setup(hass: HomeAssistant, entry: MockConfigEntry) -> None:
+async def _setup(
+    hass: HomeAssistant, entry: MockConfigEntry, diagnostics: bool = True
+) -> None:
+    """Set up the entry. The diagnostic sensors are disabled by default, so unless a test
+    says otherwise they are registered as enabled first, the way a user would enable them."""
     entry.add_to_hass(hass)
+    if diagnostics:
+        registry = er.async_get(hass)
+        for key in ("raw_state", "moving_average"):
+            registry.async_get_or_create(
+                "sensor",
+                DOMAIN,
+                f"{entry.entry_id}_{key}",
+                config_entry=entry,
+                suggested_object_id=f"pellet_stove_{key}",
+            )
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
 
@@ -591,3 +605,18 @@ async def test_no_ticking_while_the_source_is_down(hass: HomeAssistant, clock) -
     clock.now = 500
     await _after(hass, 1)  # must not raise or change anything while the sensor is gone
     assert hass.states.get(STATE).state == "burn_2"
+
+
+async def test_diagnostic_sensors_are_disabled_by_default(hass: HomeAssistant, clock) -> None:
+    entry = _entry()
+    await _setup(hass, entry, diagnostics=False)
+    registry = er.async_get(hass)
+    for entity_id in (RAW, AVERAGE):
+        reg = registry.async_get(entity_id)
+        assert reg is not None
+        assert reg.entity_category is EntityCategory.DIAGNOSTIC
+        assert reg.disabled_by is er.RegistryEntryDisabler.INTEGRATION
+        assert hass.states.get(entity_id) is None  # nothing shown until the user enables it
+    for entity_id in (STATE, GENERAL, ACTIVE):
+        assert registry.async_get(entity_id).disabled_by is None
+        assert hass.states.get(entity_id) is not None

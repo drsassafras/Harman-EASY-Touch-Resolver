@@ -1,4 +1,7 @@
-"""Sensors: resolved state, general state, and two diagnostics (raw state, moving average)."""
+"""Sensors: resolved state, general state, and two diagnostics (raw state, moving average).
+
+The two diagnostic sensors are disabled by default; enable them to tune a profile.
+"""
 
 from __future__ import annotations
 
@@ -75,6 +78,7 @@ class StoveRawStateSensor(StoveEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_options = ORDER
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, runtime: StoveRuntime) -> None:
         super().__init__(runtime, "raw_state")
@@ -93,6 +97,7 @@ class StoveMovingAverageSensor(StoveEntity, SensorEntity):
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_suggested_display_precision = 1
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
 
     def __init__(self, runtime: StoveRuntime) -> None:
         super().__init__(runtime, "moving_average")

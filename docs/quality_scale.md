@@ -61,9 +61,9 @@ How to read the status column:
 | docs-troubleshooting | Done | README "Troubleshooting". |
 | docs-use-cases | Done | README "Use cases". |
 | dynamic-devices | Exempt | One device per config entry. |
-| entity-category | Exempt | No diagnostic or configuration entities. |
+| entity-category | Done | The raw state and moving average sensors are diagnostic. |
 | entity-device-class | Done | ENUM sensors and a RUNNING binary sensor. |
-| entity-disabled-by-default | Exempt | Three entities, none noisy. |
+| entity-disabled-by-default | Done | The two diagnostic sensors are disabled by default; they exist for tuning a profile. |
 | entity-translations | Done | Names, every state of the state sensors and the diagnostic sensors' names are translated (English, Canadian French, Irish, Welsh). Irish and Welsh are not native-reviewed. |
 | exception-translations | Exempt | The integration raises no exceptions to the user. Profile validation problems are shown as translated form errors. |
 | icon-translations | Done | `icons.json` covers every state of both sensors and the binary sensor. |
